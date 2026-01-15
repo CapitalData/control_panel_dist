@@ -1,8 +1,8 @@
 site_name: Control Panel Command Station Docs
 site_description: "Teachable documentation for the retro Control Panel command station"
-site_url: https://USERNAME.github.io/REPOSITORY
-repo_url: https://github.com/USERNAME/REPOSITORY
-repo_name: GitHub
+site_url: https://gunnarklee.github.io/control_panel_dist
+repo_url: https://github.com/gunnarklee/control_panel_dist
+repo_name: control_panel_dist
 nav:
   - Home: index.md
   - DEMO Project Documentation: DEMO_project_documentation.md
@@ -50,5 +50,5 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/USERNAME/REPOSITORY
+      link: https://github.com/gunnarklee/control_panel_dist
   generator: false
