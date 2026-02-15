@@ -31,7 +31,7 @@ dash_apps:
 
   - id: finance-tracker
     name: Finance Tracker
-    path: finance_tracker_dist/dash_app.py
+    path: finance_tracker/dash_app.py
     port: 8051
     description: Financial tracking and visualization dashboard
     reverse_proxy:
@@ -46,15 +46,6 @@ dash_apps:
     reverse_proxy:
       env_prefix: INVOICE_PROCESSOR
       remote_port: 19053
-
-  - id: dash-cards
-    name: Dash Cards Frontend
-    path: dash_cards_frontends/app.py
-    port: 8052
-    description: Card-based UI components demo
-    reverse_proxy:
-      env_prefix: DASH_CARDS
-      remote_port: 19052
 
   - id: ollama-llm
     name: ollama-llm Frontend
@@ -118,7 +109,6 @@ personas:
       - invoice-parser
       - invoice-generation
     allowed_dash_apps:
-      - learning-platform
       - finance-tracker
       - dash-cards
       - ollama-llm
@@ -139,5 +129,4 @@ personas:
     allowed_tools:
       - invoice-parser
     allowed_dash_apps:
-      - learning-platform
       - ollama-llm
