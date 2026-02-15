@@ -31,7 +31,7 @@ dash_apps:
 
   - id: finance-tracker
     name: Finance Tracker
-    path: finance_tracker/dash_app.py
+    path: finance_tracker_dist/dash_app.py
     port: 8051
     description: Financial tracking and visualization dashboard
     reverse_proxy:
