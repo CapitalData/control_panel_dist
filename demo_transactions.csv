@@ -1,0 +1,6 @@
+Invoice Number,Date,Client,Description,Amount,Status,Category,Notes,inv_paid_date,inv_paid_link,qb_invoice_id,qb_invoice_url,qb_sync_status,qb_synced_at,qb_error
+INV-1001,2026-01-01,Acme Corp,Demo consulting,1000,submitted,Consulting,,,, , , , ,
+INV-1002,2026-01-05,Globex Inc,Demo design,-200,accepted,Design,,2026-01-10,https://demo-invoice-link.com, , ,synced,2026-01-11,
+INV-1003,2026-01-10,Initech,Demo purchase,-50,paid,Purchase,,2026-01-15,https://demo-invoice-link.com, , ,synced,2026-01-16,
+INV-1004,2026-01-15,Demo LLC,Demo sale,500,submitted,Sales,,,,,,,
+INV-1005,2026-01-20,Fabrikam,Demo refund,100,accepted,Refunds,,2026-01-25,https://demo-invoice-link.com, , ,processing, ,

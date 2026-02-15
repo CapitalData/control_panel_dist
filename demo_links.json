@@ -1,0 +1,7 @@
+{
+  "links": [
+    {"name": "Demo Bank", "url": "https://demo-bank.example.com"},
+    {"name": "Demo Payroll", "url": "https://demo-payroll.example.com"},
+    {"name": "Demo Tax Service", "url": "https://demo-tax.example.com"}
+  ]
+}
