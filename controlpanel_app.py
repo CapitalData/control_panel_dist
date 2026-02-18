@@ -254,6 +254,14 @@ DASH_APPS = config['dash_apps']
 TOOL_LOOKUP = {tool["id"]: tool for tool in PYTHON_TOOLS}
 DASH_LOOKUP = {app["id"]: app for app in DASH_APPS}
 
+LLM_TOOL_IDS = {"phoenix-arize"}
+LLM_DASH_IDS = {"ollama-llm", "ollama-chat"}
+FINANCE_KEYWORDS = ("finance", "invoice", "billing", "payment", "ledger")
+DEFAULT_PHOENIX_PROJECT_NAME = os.environ.get(
+    "CONTROL_PANEL_PHOENIX_PROJECT_NAME",
+    config.get("panel_groups", {}).get("llm", {}).get("project_name", "default"),
+)
+
 DEFAULT_PERSONA_ID = os.environ.get("CONTROL_PANEL_DEFAULT_PERSONA", "admin").lower()
 if DEFAULT_PERSONA_ID not in PERSONAS:
     DEFAULT_PERSONA_ID = "admin"
@@ -271,6 +279,11 @@ def get_persona(persona_id):
     if persona_id in PERSONAS:
         return PERSONAS[persona_id]
     return PERSONAS["admin"]
+
+
+def _is_finance_id(item_id):
+    lowered = item_id.lower()
+    return any(keyword in lowered for keyword in FINANCE_KEYWORDS)
 
 # Global state management
 app_processes = {}
@@ -307,12 +320,34 @@ def init_state():
 
 init_state()
 
+
+def sanitize_output_text(value):
+    """Normalize process output so Dash JSON serialization is resilient."""
+    text = str(value)
+    text = text.replace("\x00", "")
+    text = text.replace("\r", "")
+    # Normalize backslashes to avoid malformed escape sequences in downstream JSON handling.
+    text = text.replace("\\", "/")
+    return text
+
+
+def sanitize_project_name(value):
+    """Normalize the user-selected Phoenix project name."""
+    text = (value or "").strip()
+    return text or "default"
+
+
+def build_observability_env(project_name):
+    """Environment variables that tag traces to a Phoenix project."""
+    return {"PHOENIX_PROJECT_NAME": sanitize_project_name(project_name)}
+
 def read_output(process, app_id):
     """Read process output in a separate thread"""
     try:
         for line in iter(process.stdout.readline, b''):
             if line:
-                decoded = line.decode('utf-8').strip()
+                decoded = line.decode('utf-8', errors='replace').strip()
+                decoded = sanitize_output_text(decoded)
                 app_outputs[app_id].append(f"[{datetime.now().strftime('%H:%M:%S')}] {decoded}")
                 # Keep only last 100 lines
                 if len(app_outputs[app_id]) > 100:
@@ -320,7 +355,7 @@ def read_output(process, app_id):
     except Exception as e:
         app_outputs[app_id].append(f"[ERROR] {str(e)}")
 
-def start_python_tool(tool_id):
+def start_python_tool(tool_id, extra_env=None):
     """Start a Python tool"""
     tool = next((t for t in PYTHON_TOOLS if t["id"] == tool_id), None)
     if not tool:
@@ -332,12 +367,17 @@ def start_python_tool(tool_id):
     try:
         if tool["type"] == "notebook":
             return False, "Notebooks must be opened manually in Jupyter"
+
+        env = os.environ.copy()
+        if extra_env:
+            env.update(extra_env)
         
         process = subprocess.Popen(
             [sys.executable, str(tool["path"])],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             cwd=tool["path"].parent,
+            env=env,
             bufsize=1,
             close_fds=True,
             start_new_session=True
@@ -361,7 +401,7 @@ def get_dash_app(app_id):
     return next((a for a in DASH_APPS if a["id"] == app_id), None)
 
 
-def start_dash_app(app_id):
+def start_dash_app(app_id, extra_env=None):
     """Start a Dash application"""
     app_config = get_dash_app(app_id)
     if not app_config:
@@ -371,11 +411,20 @@ def start_dash_app(app_id):
         return False, "Already running"
     
     try:
-        # Check if port is available
+        # Check if port is available (Ollama can attach to an existing listener)
+        allow_port_in_use = app_id == "ollama-llm"
         for proc in psutil.process_iter(['pid', 'name']):
             try:
                 for conn in proc.connections():
                     if conn.laddr.port == app_config["port"]:
+                        if allow_port_in_use:
+                            app_outputs.setdefault(app_id, [])
+                            app_outputs[app_id].append(
+                                f"[{datetime.now().strftime('%H:%M:%S')}] Port {app_config['port']} already in use; attaching to existing service"
+                            )
+                            if len(app_outputs[app_id]) > 100:
+                                app_outputs[app_id] = app_outputs[app_id][-100:]
+                            break
                         return False, f"Port {app_config['port']} already in use"
             except (psutil.AccessDenied, psutil.NoSuchProcess):
                 pass
@@ -386,6 +435,8 @@ def start_dash_app(app_id):
         env.pop('WERKZEUG_RUN_MAIN', None)
         # Set custom flag for apps to detect control panel launch
         env['LAUNCHED_FROM_CONTROL_PANEL'] = 'true'
+        if extra_env:
+            env.update(extra_env)
         
         process = subprocess.Popen(
             [sys.executable, str(app_config["path"])],
@@ -418,6 +469,7 @@ def read_proxy_output(process, app_id):
         for line in iter(process.stdout.readline, b''):
             if line:
                 decoded = line.decode('utf-8', errors='replace').strip()
+                decoded = sanitize_output_text(decoded)
                 app_outputs[app_id].append(
                     f"[{datetime.now().strftime('%H:%M:%S')}] [PROXY] {decoded}"
                 )
@@ -1012,10 +1064,60 @@ def build_dash_cards(app_ids):
     return [_render_empty_panel("No reactors available for this persona.")]
 
 
+def build_llm_panel_cards(tool_ids, app_ids):
+    """Render combined utility/reactor cards for LLM workflow."""
+    llm_tools = [
+        tool_id for tool_id in tool_ids
+        if tool_id in LLM_TOOL_IDS or not _is_finance_id(tool_id)
+    ]
+    llm_apps = [
+        app_id for app_id in app_ids
+        if app_id in LLM_DASH_IDS or not _is_finance_id(app_id)
+    ]
+
+    children = []
+    if llm_tools:
+        children.append(html.H6("LLM Utilities", className="status-text mb-3"))
+        children.extend(build_tool_cards(llm_tools))
+    if llm_apps:
+        children.append(html.H6("LLM Reactors", className="status-text mb-3 mt-4"))
+        children.extend(build_dash_cards(llm_apps))
+    if children:
+        return children
+    return [_render_empty_panel("No LLM tools/reactors assigned to this persona.")]
+
+
+def build_finance_panel_cards(tool_ids, app_ids):
+    """Render combined utility/reactor cards for finance workflow."""
+    finance_tools = [
+        tool_id for tool_id in tool_ids
+        if _is_finance_id(tool_id) and tool_id not in LLM_TOOL_IDS
+    ]
+    finance_apps = [
+        app_id for app_id in app_ids
+        if _is_finance_id(app_id) and app_id not in LLM_DASH_IDS
+    ]
+
+    children = []
+    if finance_tools:
+        children.append(html.H6("Financial Utilities", className="status-text mb-3"))
+        children.extend(build_tool_cards(finance_tools))
+    if finance_apps:
+        children.append(html.H6("Financial Reactors", className="status-text mb-3 mt-4"))
+        children.extend(build_dash_cards(finance_apps))
+    if children:
+        return children
+    return [_render_empty_panel("No financial tools/reactors assigned to this persona.")]
+
+
 initial_persona = get_persona(DEFAULT_PERSONA_ID)
-initial_tool_children = build_tool_cards(initial_persona["allowed_tools"])
-initial_dash_children = build_dash_cards(initial_persona["allowed_dash_apps"])
-initial_active_tab = "tools" if initial_persona["allowed_tools"] else "dash-apps"
+initial_llm_children = build_llm_panel_cards(
+    initial_persona["allowed_tools"], initial_persona["allowed_dash_apps"]
+)
+initial_finance_children = build_finance_panel_cards(
+    initial_persona["allowed_tools"], initial_persona["allowed_dash_apps"]
+)
+initial_active_tab = "llm-panel"
 persona_switch_style = {} if ALLOW_PERSONA_SWITCH else {"display": "none"}
 initial_persona_chip = [
     html.Span("PERSONA", className="status-text me-2"),
@@ -1026,6 +1128,7 @@ initial_persona_chip = [
 
 app.layout = html.Div([
     dcc.Store(id="active-persona", data=initial_persona["id"]),
+    dcc.Store(id="phoenix-project-name", data=DEFAULT_PHOENIX_PROJECT_NAME),
     dbc.Container([
         # Main console panel
         html.Div([
@@ -1089,14 +1192,55 @@ app.layout = html.Div([
                     [
                         html.Div([
                             html.Span("◈", style={"color": "#d4a017", "fontSize": "20px"}),
-                            html.Span(" UTILITY SYSTEMS ", className="label-plate mx-2"),
+                            html.Span(" LLM OPERATIONS ", className="label-plate mx-2"),
                             html.Span("◈", style={"color": "#d4a017", "fontSize": "20px"}),
                         ], className="text-center mb-4 mt-3"),
-                        html.Div(initial_tool_children, id="tool-card-container"),
+
+                        dbc.Alert(
+                            [
+                                html.Strong("Recommended LLM startup order: ", style={"color": "#d4a017"}),
+                                html.Span("1) Phoenix/Arize  →  2) Ollama  →  3) Ollama Chat UI", style={"color": "#ccc"}),
+                                html.Br(),
+                                html.Span("Breadcrumb: Observability first, model second, interface third.", style={"color": "#888", "fontSize": "11px"}),
+                            ],
+                            color="dark",
+                            className="mb-4",
+                            style={
+                                "backgroundColor": "#1a1a1a",
+                                "border": "2px solid #d4a017",
+                                "borderRadius": "4px",
+                                "fontFamily": "'Courier New', monospace",
+                            },
+                        ),
+
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    [
+                                        dbc.Label("Phoenix Project", className="status-text mb-1"),
+                                        dbc.Input(
+                                            id="phoenix-project-input",
+                                            type="text",
+                                            value=DEFAULT_PHOENIX_PROJECT_NAME,
+                                            debounce=True,
+                                            placeholder="default",
+                                        ),
+                                        html.Small(
+                                            "Traces from Ollama Chat will be tagged to this project.",
+                                            style={"color": "#888", "fontFamily": "'Courier New', monospace"},
+                                        ),
+                                    ],
+                                    width=12,
+                                )
+                            ],
+                            className="mb-3",
+                        ),
+
+                        html.Div(initial_llm_children, id="llm-card-container"),
                     ],
-                    label="⚡ UTILITIES",
-                    tab_id="tools",
-                    id="tools-tab",
+                    label="🧠 LLM PANEL",
+                    tab_id="llm-panel",
+                    id="llm-tab",
                     label_style={
                         "fontFamily": "'Courier New', monospace",
                         "fontWeight": "bold",
@@ -1108,7 +1252,7 @@ app.layout = html.Div([
                         html.Div([
                             html.Span("◈", style={"color": "#d4a017", "fontSize": "20px"}),
                             html.Span(
-                                " APPLICATION REACTORS ",
+                                " FINANCIAL OPERATIONS ",
                                 className="label-plate mx-2",
                             ),
                             html.Span("◈", style={"color": "#d4a017", "fontSize": "20px"}),
@@ -1151,11 +1295,11 @@ app.layout = html.Div([
                             },
                         ),
 
-                        html.Div(initial_dash_children, id="dash-card-container"),
+                        html.Div(initial_finance_children, id="finance-card-container"),
                     ],
-                    label="🚀 REACTORS",
-                    tab_id="dash-apps",
-                    id="dash-tab",
+                    label="💰 FINANCE PANEL",
+                    tab_id="finance-panel",
+                    id="finance-tab",
                     label_style={
                         "fontFamily": "'Courier New', monospace",
                         "fontWeight": "bold",
@@ -1183,10 +1327,20 @@ app.layout = html.Div([
 
 
 @callback(
+    Output("phoenix-project-name", "data"),
+    Input("phoenix-project-input", "value"),
+    prevent_initial_call=False,
+)
+def update_phoenix_project_name(project_name):
+    """Persist the Phoenix project name selected in the control panel UI."""
+    return sanitize_project_name(project_name)
+
+
+@callback(
     Output("active-persona", "data"),
     Output("persona-root", "className"),
-    Output("tool-card-container", "children"),
-    Output("dash-card-container", "children"),
+    Output("llm-card-container", "children"),
+    Output("finance-card-container", "children"),
     Output("persona-chip", "children"),
     Output("tabs", "active_tab"),
     Input("persona-select", "value"),
@@ -1197,21 +1351,25 @@ def update_persona_view(selected_persona):
     persona_key = (selected_persona or DEFAULT_PERSONA_ID).lower()
     persona = get_persona(persona_key)
 
-    tool_children = build_tool_cards(persona["allowed_tools"])
-    dash_children = build_dash_cards(persona["allowed_dash_apps"])
+    llm_children = build_llm_panel_cards(
+        persona["allowed_tools"], persona["allowed_dash_apps"]
+    )
+    finance_children = build_finance_panel_cards(
+        persona["allowed_tools"], persona["allowed_dash_apps"]
+    )
     persona_chip = [
         html.Span("PERSONA", className="status-text me-2"),
         html.Span(persona["name"], className="persona-chip__name"),
         html.Span(persona["description"], className="persona-chip__desc ms-2"),
     ]
     root_class = f"persona-wrapper {persona['theme_class']}"
-    active_tab = "tools" if persona["allowed_tools"] else "dash-apps"
+    active_tab = "llm-panel"
 
     return (
         persona["id"],
         root_class,
-        tool_children,
-        dash_children,
+        llm_children,
+        finance_children,
         persona_chip,
         active_tab,
     )
@@ -1225,9 +1383,10 @@ def update_persona_view(selected_persona):
     Input({"type": "tool-kill", "index": MATCH}, "n_clicks"),
     Input("status-update", "n_intervals"),
     State({"type": "tool-checkbox", "index": MATCH}, "id"),
+    State("phoenix-project-name", "data"),
     prevent_initial_call=False
 )
-def handle_python_tool(checked, kill_clicks, n, tool_id_dict):
+def handle_python_tool(checked, kill_clicks, n, tool_id_dict, project_name):
     """Handle Python tool checkbox and status updates"""
     tool_id = tool_id_dict["index"]
     triggered_id = ctx.triggered_id
@@ -1235,7 +1394,10 @@ def handle_python_tool(checked, kill_clicks, n, tool_id_dict):
     # Handle checkbox toggle
     if triggered_id and isinstance(triggered_id, dict) and triggered_id.get("type") == "tool-checkbox":
         if checked:
-            success, message = start_python_tool(tool_id)
+            success, message = start_python_tool(
+                tool_id,
+                extra_env=build_observability_env(project_name),
+            )
             if not success:
                 app_outputs[tool_id].append(f"[ERROR] {message}")
         else:
@@ -1256,7 +1418,7 @@ def handle_python_tool(checked, kill_clicks, n, tool_id_dict):
         "textShadow": "0 0 10px rgba(0,255,0,0.8)" if is_running else "none"
     }
     
-    output_text = "\n".join(app_outputs.get(tool_id, ["No output yet"]))
+    output_text = sanitize_output_text("\n".join(app_outputs.get(tool_id, ["No output yet"])))
     
     return checked and True, indicator_style, output_text
 
@@ -1273,9 +1435,10 @@ def handle_python_tool(checked, kill_clicks, n, tool_id_dict):
     Input({"type": "dash-kill", "index": MATCH}, "value"),
     Input("status-update", "n_intervals"),
     State({"type": "dash-checkbox", "index": MATCH}, "id"),
+    State("phoenix-project-name", "data"),
     prevent_initial_call=False
 )
-def handle_dash_app(checked, proxy_checked, kill_value, n, app_id_dict):
+def handle_dash_app(checked, proxy_checked, kill_value, n, app_id_dict, project_name):
     """Handle Dash app checkbox and status updates"""
     app_id = app_id_dict["index"]
     triggered_id = ctx.triggered_id
@@ -1286,7 +1449,10 @@ def handle_dash_app(checked, proxy_checked, kill_value, n, app_id_dict):
     # Handle checkbox toggle
     if triggered_id and isinstance(triggered_id, dict) and triggered_id.get("type") == "dash-checkbox":
         if checked:
-            success, message = start_dash_app(app_id)
+            success, message = start_dash_app(
+                app_id,
+                extra_env=build_observability_env(project_name),
+            )
             if not success:
                 app_outputs[app_id].append(f"[ERROR] {message}")
         else:
@@ -1354,7 +1520,7 @@ def handle_dash_app(checked, proxy_checked, kill_value, n, app_id_dict):
             "boxShadow": "inset 0 2px 4px rgba(0,0,0,0.3)"
         }
     
-    output_text = "\n".join(app_outputs.get(app_id, ["No output yet"]))
+    output_text = sanitize_output_text("\n".join(app_outputs.get(app_id, ["No output yet"])))
 
     # Proxy indicators
     update_proxy_health(app_id)

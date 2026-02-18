@@ -19,6 +19,12 @@ python_tools:
     type: notebook
     description: Generate invoices (Jupyter Notebook)
 
+  - id: phoenix-arize
+    name: Phoenix/Arize Traces
+    path: phoenix_arize/app.py
+    type: service
+    description: Local OpenTelemetry trace collection and visualization via Phoenix/Arize
+
 dash_apps:
   - id: learning-platform
     name: Learning Platform
@@ -55,6 +61,35 @@ dash_apps:
     reverse_proxy:
       env_prefix: OLLAMA_LLM
       remote_port: 19053
+
+  - id: ollama-chat
+    name: Ollama Chat UI
+    path: ollama_llm/ollama_chat_app.py
+    port: 11500
+    description: Chat interface for Ollama with OpenTelemetry tracing to Phoenix
+    reverse_proxy:
+      env_prefix: OLLAMA_CHAT
+      remote_port: 19054
+
+# Panel Grouping - Tune UI categorization without editing Python code
+panel_groups:
+  llm:
+    tool_ids:
+      - phoenix-arize
+    dash_ids:
+      - ollama-llm
+      - ollama-chat
+    startup_order:
+      - Phoenix/Arize
+      - Ollama
+      - Ollama Chat UI
+  finance:
+    id_keywords:
+      - finance
+      - invoice
+      - billing
+      - payment
+      - ledger
 
 # App Skins - Define visual themes for different personas
 skins:
@@ -108,10 +143,12 @@ personas:
     allowed_tools:
       - invoice-parser
       - invoice-generation
+      - phoenix-arize
     allowed_dash_apps:
       - finance-tracker
       - dash-cards
       - ollama-llm
+      - ollama-chat
       - invoice-tool
 
   developer:
@@ -119,9 +156,11 @@ personas:
     skin: dark
     allowed_tools:
       - invoice-parser
+      - phoenix-arize
     allowed_dash_apps:
       - learning-platform
       - ollama-llm
+      - ollama-chat
 
   public_user:
     name: Public User
@@ -130,3 +169,4 @@ personas:
       - invoice-parser
     allowed_dash_apps:
       - ollama-llm
+      - ollama-chat
