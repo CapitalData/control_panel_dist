@@ -15,7 +15,7 @@ Technical Notes:
     app.run_server(..., use_reloader=use_reloader)
 
 - This control panel runs on port 8060
-- Status updates every 2 seconds via dcc.Interval
+- Status updates are configurable via CONTROL_PANEL_STATUS_INTERVAL_MS
 
 Usage:
 ------
@@ -267,6 +267,10 @@ if DEFAULT_PERSONA_ID not in PERSONAS:
     DEFAULT_PERSONA_ID = "admin"
 
 ALLOW_PERSONA_SWITCH = env_bool("CONTROL_PANEL_ALLOW_PERSONA_SWITCH", True)
+STATUS_UPDATE_INTERVAL_MS = max(
+    1000,
+    env_int("CONTROL_PANEL_STATUS_INTERVAL_MS", 5000) or 5000,
+)
 
 PERSONA_OPTIONS = [
     {"label": data["name"], "value": persona_id}
@@ -293,6 +297,7 @@ proxy_processes = {}
 proxy_status = {}
 proxy_health = {}
 proxy_last_check = {}
+ui_render_state = {}
 
 def init_state():
     """Initialize global state for all apps"""
@@ -300,6 +305,12 @@ def init_state():
         app_processes[tool["id"]] = None
         app_outputs[tool["id"]] = []
         app_status[tool["id"]] = "stopped"
+        ui_render_state[tool["id"]] = {
+            "running": False,
+            "output_signature": (0, ""),
+            "proxy_state": None,
+            "proxy_message": None,
+        }
     
     for app_config in DASH_APPS:
         app_processes[app_config["id"]] = None
@@ -307,6 +318,12 @@ def init_state():
         app_status[app_config["id"]] = "stopped"
         proxy_processes[app_config["id"]] = None
         proxy_status[app_config["id"]] = "inactive"
+        ui_render_state[app_config["id"]] = {
+            "running": False,
+            "output_signature": (0, ""),
+            "proxy_state": "inactive",
+            "proxy_message": "Tunnel offline",
+        }
         proxy_cfg = app_config.get("reverse_proxy") or {}
         if proxy_cfg.get("configured"):
             proxy_health[app_config["id"]] = {"state": "inactive", "message": "Tunnel offline"}
@@ -329,6 +346,14 @@ def sanitize_output_text(value):
     # Normalize backslashes to avoid malformed escape sequences in downstream JSON handling.
     text = text.replace("\\", "/")
     return text
+
+
+def output_signature(app_id):
+    """Cheap signature to detect console output changes."""
+    lines = app_outputs.get(app_id, [])
+    if not lines:
+        return (0, "")
+    return (len(lines), lines[-1])
 
 
 def sanitize_project_name(value):
@@ -1316,10 +1341,33 @@ app.layout = html.Div([
                     html.Span(" │ ", style={"color": "#444"}),
                     html.Span("PORT 8060", className="status-text"),
                 ], className="text-center"),
+                html.Div(
+                    [
+                        dbc.Button(
+                            "Pause Live Polling",
+                            id="toggle-polling",
+                            color="secondary",
+                            size="sm",
+                            className="mt-3",
+                        ),
+                        html.Div(
+                            "Live polling: ON",
+                            id="polling-status-label",
+                            className="status-text mt-2",
+                            style={"fontSize": "11px", "color": "#aaa"},
+                        ),
+                    ],
+                    className="text-center",
+                ),
             ], className="mt-4"),
         ], className="military-panel p-4", style={"position": "relative", "marginTop": "20px"}),
 
-        dcc.Interval(id="status-update", interval=2000, n_intervals=0),
+        dcc.Interval(
+            id="status-update",
+            interval=STATUS_UPDATE_INTERVAL_MS,
+            n_intervals=0,
+            disabled=False,
+        ),
     ], fluid=True, className="p-4"),
 ], id="persona-root", className=f"persona-wrapper {initial_persona['theme_class']}")
 
@@ -1334,6 +1382,21 @@ app.layout = html.Div([
 def update_phoenix_project_name(project_name):
     """Persist the Phoenix project name selected in the control panel UI."""
     return sanitize_project_name(project_name)
+
+
+@callback(
+    Output("status-update", "disabled"),
+    Output("toggle-polling", "children"),
+    Output("polling-status-label", "children"),
+    Input("toggle-polling", "n_clicks"),
+    prevent_initial_call=False,
+)
+def toggle_live_polling(n_clicks):
+    """Pause/resume interval-driven status refreshes for a smoother UI."""
+    paused = bool((n_clicks or 0) % 2)
+    if paused:
+        return True, "Resume Live Polling", "Live polling: PAUSED"
+    return False, "Pause Live Polling", "Live polling: ON"
 
 
 @callback(
@@ -1412,6 +1475,15 @@ def handle_python_tool(checked, kill_clicks, n, tool_id_dict, project_name):
     
     # Update status
     is_running = app_status.get(tool_id) == "running"
+    current_output_signature = output_signature(tool_id)
+    if triggered_id == "status-update":
+        previous_state = ui_render_state.get(tool_id, {})
+        if (
+            previous_state.get("running") == is_running
+            and previous_state.get("output_signature") == current_output_signature
+        ):
+            return no_update, no_update, no_update
+
     indicator_style = {
         "color": "#00ff00" if is_running else "#333",
         "fontSize": "28px",
@@ -1419,6 +1491,12 @@ def handle_python_tool(checked, kill_clicks, n, tool_id_dict, project_name):
     }
     
     output_text = sanitize_output_text("\n".join(app_outputs.get(tool_id, ["No output yet"])))
+    ui_render_state[tool_id] = {
+        "running": is_running,
+        "output_signature": current_output_signature,
+        "proxy_state": None,
+        "proxy_message": None,
+    }
     
     return checked and True, indicator_style, output_text
 
@@ -1483,6 +1561,7 @@ def handle_dash_app(checked, proxy_checked, kill_value, n, app_id_dict, project_
     
     # Update status
     is_running = app_status.get(app_id) == "running"
+    current_output_signature = output_signature(app_id)
     indicator_style = {
         "color": "#00ff00" if is_running else "#333",
         "fontSize": "28px",
@@ -1570,6 +1649,23 @@ def handle_dash_app(checked, proxy_checked, kill_value, n, app_id_dict, project_
     proxy_status_text = proxy_state.get("message", "")
     if endpoint:
         proxy_status_text = f"{endpoint} • {proxy_status_text}"
+
+    if triggered_id == "status-update":
+        previous_state = ui_render_state.get(app_id, {})
+        if (
+            previous_state.get("running") == is_running
+            and previous_state.get("output_signature") == current_output_signature
+            and previous_state.get("proxy_state") == state
+            and previous_state.get("proxy_message") == proxy_status_text
+        ):
+            return no_update, no_update, no_update, no_update, no_update, no_update, no_update
+
+    ui_render_state[app_id] = {
+        "running": is_running,
+        "output_signature": current_output_signature,
+        "proxy_state": state,
+        "proxy_message": proxy_status_text,
+    }
     
     return (
         checked and True,
