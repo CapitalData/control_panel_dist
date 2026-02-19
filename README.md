@@ -205,6 +205,9 @@ Once the config entry exists, the panel automatically renders a matching gauge c
 - **Invoice Parser** - Parse invoice PDFs and extract data
 - **Invoice Generator** - Generate invoices (Jupyter Notebook - manual open)
 
+If the Invoice Tool shows demo/empty data, use the reconnect guide:
+- [finance_tracker/QUICKSTART.md](../finance_tracker/QUICKSTART.md#reconnect-to-existing-historical-data)
+
 ### Dash Applications  
 - **Learning Platform** (port 8050) - Educational platform with courses
 - **Finance Tracker** (port 8051) - Financial tracking dashboard
