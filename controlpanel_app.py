@@ -295,6 +295,7 @@ DASH_LOOKUP = {app["id"]: app for app in DASH_APPS}
 LLM_TOOL_IDS = set()
 LLM_DASH_IDS = {"phoenix-arize", "ollama-llm", "ollama-chat"}
 FINANCE_KEYWORDS = ("finance", "invoice", "billing", "payment", "ledger")
+MANAGER_DASH_IDS = {"invoice-tool", "finance-tracker"}
 DEFAULT_PHOENIX_PROJECT_NAME = os.environ.get(
     "CONTROL_PANEL_PHOENIX_PROJECT_NAME",
     config.get("panel_groups", {}).get("llm", {}).get("project_name", "default"),
@@ -1173,11 +1174,61 @@ def build_finance_panel_cards(tool_ids, app_ids):
     return [_render_empty_panel("No financial tools/reactors assigned to this persona.")]
 
 
+def build_manager_panel_cards(tool_ids, app_ids):
+    """Render management-focused cards: invoice workflow + finance dashboards."""
+    manager_apps = [
+        app_id for app_id in app_ids
+        if app_id in MANAGER_DASH_IDS
+    ]
+    # Include any finance/invoice tools (e.g. invoice-parser) for managers
+    manager_tools = [
+        tool_id for tool_id in tool_ids
+        if _is_finance_id(tool_id)
+    ]
+
+    children = [
+        dbc.Alert(
+            [
+                html.Strong("📋 MANAGEMENT OVERVIEW: ", style={"color": "#60a5fa"}),
+                html.Span(
+                    "Launch and monitor operational dashboards from this panel.",
+                    style={"color": "#cbd5e1"},
+                ),
+                html.Br(),
+                html.Span(
+                    "Recommended: Finance Tracker for reporting → Invoice Tool for workflow management.",
+                    style={"color": "#94a3b8", "fontSize": "11px"},
+                ),
+            ],
+            color="dark",
+            className="mb-4",
+            style={
+                "backgroundColor": "#0f172a",
+                "border": "2px solid #2563eb",
+                "borderRadius": "4px",
+                "fontFamily": "'Segoe UI', Arial, sans-serif",
+            },
+        ),
+    ]
+    if manager_tools:
+        children.append(html.H6("Management Utilities", className="status-text mb-3"))
+        children.extend(build_tool_cards(manager_tools))
+    if manager_apps:
+        children.append(html.H6("Operational Dashboards", className="status-text mb-3 mt-4"))
+        children.extend(build_dash_cards(manager_apps))
+    if len(children) == 1:  # only the alert, no real content
+        children.append(_render_empty_panel("No management tools assigned to this persona."))
+    return children
+
+
 initial_persona = get_persona(DEFAULT_PERSONA_ID)
 initial_llm_children = build_llm_panel_cards(
     initial_persona["allowed_tools"], initial_persona["allowed_dash_apps"]
 )
 initial_finance_children = build_finance_panel_cards(
+    initial_persona["allowed_tools"], initial_persona["allowed_dash_apps"]
+)
+initial_manager_children = build_manager_panel_cards(
     initial_persona["allowed_tools"], initial_persona["allowed_dash_apps"]
 )
 initial_active_tab = "llm-panel"
@@ -1368,6 +1419,28 @@ app.layout = html.Div([
                         "fontWeight": "bold",
                     },
                 ),
+
+                dbc.Tab(
+                    [
+                        html.Div([
+                            html.Span("◈", style={"color": "#3b82f6", "fontSize": "20px"}),
+                            html.Span(
+                                " MANAGER TOOLS ",
+                                className="label-plate mx-2",
+                            ),
+                            html.Span("◈", style={"color": "#3b82f6", "fontSize": "20px"}),
+                        ], className="text-center mb-3 mt-3"),
+
+                        html.Div(initial_manager_children, id="manager-card-container"),
+                    ],
+                    label="📋 MANAGER TOOLS",
+                    tab_id="manager-panel",
+                    id="manager-tab",
+                    label_style={
+                        "fontFamily": "'Segoe UI', Arial, sans-serif",
+                        "fontWeight": "bold",
+                    },
+                ),
             ], id="tabs", active_tab=initial_active_tab, className="mb-4"),
 
             # Footer with status
@@ -1442,6 +1515,7 @@ def toggle_live_polling(n_clicks):
     Output("persona-root", "className"),
     Output("llm-card-container", "children"),
     Output("finance-card-container", "children"),
+    Output("manager-card-container", "children"),
     Output("persona-chip", "children"),
     Output("tabs", "active_tab"),
     Input("persona-select", "value"),
@@ -1458,19 +1532,23 @@ def update_persona_view(selected_persona):
     finance_children = build_finance_panel_cards(
         persona["allowed_tools"], persona["allowed_dash_apps"]
     )
+    manager_children = build_manager_panel_cards(
+        persona["allowed_tools"], persona["allowed_dash_apps"]
+    )
     persona_chip = [
         html.Span("PERSONA", className="status-text me-2"),
         html.Span(persona["name"], className="persona-chip__name"),
         html.Span(persona["description"], className="persona-chip__desc ms-2"),
     ]
     root_class = f"persona-wrapper {persona['theme_class']}"
-    active_tab = "llm-panel"
+    active_tab = "manager-panel" if persona_key == "management" else "llm-panel"
 
     return (
         persona["id"],
         root_class,
         llm_children,
         finance_children,
+        manager_children,
         persona_chip,
         active_tab,
     )

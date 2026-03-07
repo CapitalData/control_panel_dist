@@ -120,6 +120,20 @@ skins:
       border: "#404040"
     font_family: "Arial, sans-serif"
 
+  management:
+    name: Management Suite
+    colors:
+      primary: "#2563eb"
+      secondary: "#64748b"
+      background: "#0f172a"
+      surface: "#1e293b"
+      text: "#e2e8f0"
+      border: "#334155"
+      accent: "#3b82f6"
+      highlight: "#60a5fa"
+    font_family: "'Segoe UI', 'Roboto', Arial, sans-serif"
+    font_weight: 500
+
   titanium:
     name: Brushed Metal Titanium
     colors:
@@ -166,6 +180,20 @@ personas:
       - learning-platform
       - ollama-llm
       - ollama-chat
+
+  management:
+    name: Management
+    skin: management
+    description: Operations & reporting overview
+    allowed_tools:
+      - invoice-parser
+      - invoice-generation
+    allowed_dash_apps:
+      - phoenix-arize
+      - finance-tracker
+      - ollama-llm
+      - ollama-chat
+      - invoice-tool
 
   public_user:
     name: Public User

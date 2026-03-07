@@ -338,6 +338,73 @@
     background: rgba(10, 34, 60, 0.7);
     border-color: rgba(159, 201, 255, 0.2);
 }
+
+/* ── Management theme ─────────────────────────────────────────────────────── */
+.persona-wrapper.persona-management {
+    background: radial-gradient(circle at 20% 10%, #1e3a5c 0%, #0b1624 55%, #07101d 100%);
+}
+.persona-wrapper.persona-management .military-panel {
+    background: linear-gradient(155deg, #12253d 0%, #1a3352 45%, #08131e 100%);
+    border-color: #2563eb;
+    box-shadow:
+        inset 0 2px 6px rgba(255,255,255,0.06),
+        inset 0 -3px 8px rgba(0,0,0,0.6),
+        0 10px 28px rgba(7,16,29,0.85);
+}
+.persona-wrapper.persona-management .console-title {
+    color: #93c5fd;
+    text-shadow: 0 2px 8px rgba(37,99,235,0.5);
+}
+.persona-wrapper.persona-management .warning-stripe {
+    background: linear-gradient(90deg, #1e40af, #3b82f6, #60a5fa, #3b82f6, #1e40af);
+    box-shadow: inset 0 1px 3px rgba(10,25,55,0.6);
+}
+.persona-wrapper.persona-management .label-plate {
+    background: linear-gradient(180deg, #dbeafe 0%, #93c5fd 100%);
+    color: #0f172a;
+    border-color: #2563eb;
+    box-shadow: 0 2px 6px rgba(12,30,70,0.55);
+}
+.persona-wrapper.persona-management .indicator-housing {
+    background: #060e1a;
+    border-color: #1e3a5c;
+}
+.persona-wrapper.persona-management .toggle-base {
+    background: linear-gradient(180deg, #1e3a5c, #0f1f33);
+    border-color: #3b82f6;
+}
+.persona-wrapper.persona-management .kill-button {
+    background: linear-gradient(180deg, #1d4ed8, #1e3a5c);
+    border-color: #60a5fa;
+    box-shadow: 0 0 16px rgba(96,165,250,0.35), inset 0 2px 4px rgba(0,0,0,0.4);
+}
+.persona-wrapper.persona-management .terminal-output {
+    background: #04090f !important;
+    color: #93c5fd !important;
+    border-color: #1e3a5c !important;
+    text-shadow: 0 0 6px rgba(147,197,253,0.3);
+}
+.persona-wrapper.persona-management .persona-row {
+    background: rgba(14, 30, 55, 0.75);
+    border-color: rgba(96, 165, 250, 0.2);
+}
+.persona-wrapper.persona-management .persona-chip {
+    border-color: rgba(96, 165, 250, 0.35);
+    background: rgba(14, 30, 55, 0.6);
+}
+.persona-wrapper.persona-management .persona-chip__name {
+    color: #93c5fd;
+}
+.persona-wrapper.persona-management .nav-link.active,
+.persona-wrapper.persona-management .nav-tabs .nav-link.active {
+    background-color: #1e3a5c !important;
+    border-color: #2563eb !important;
+    color: #93c5fd !important;
+}
+.persona-wrapper.persona-management .nav-tabs .nav-link {
+    color: #64748b;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
 .persona-wrapper.persona-scientist .persona-chip {
     background: rgba(13, 38, 66, 0.8);
     border-color: #4f7ea9;
