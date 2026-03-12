@@ -76,29 +76,42 @@ dash_apps:
       env_prefix: OLLAMA_CHAT
       remote_port: 19054
 
-# Panel Grouping - Tune UI categorization without editing Python code
+# Panel Grouping - Controls which tab each tool/app appears in.
+# Each panel must have explicit tool_ids and dash_ids lists.
+# Ordering within each list determines card render order.
 panel_groups:
   llm:
+    label: "🧠 LLM PANEL"
+    tab_id: llm-panel
     tool_ids: []
     dash_ids:
       - phoenix-arize
       - ollama-llm
       - ollama-chat
-    startup_order:
-      - Phoenix/Arize
-      - Ollama
-      - Ollama Chat UI
-  finance:
-    id_keywords:
-      - finance
-      - invoice
-      - billing
-      - payment
-      - ledger
+    project_name: default
 
-# App Skins - Define visual themes for different personas
+  finance:
+    label: "💰 FINANCE PANEL"
+    tab_id: finance-panel
+    tool_ids: []
+    dash_ids:
+      - finance-tracker
+      - invoice-tool
+
+  manager:
+    label: "📋 MANAGER TOOLS"
+    tab_id: manager-panel
+    tool_ids:
+      - invoice-parser
+    dash_ids:
+
+
+# App Skins - Define visual themes for different personas.
+# css_class: the CSS class applied to .persona-wrapper when this skin is active.
+#            Must match a .persona-wrapper.<css_class> rule in assets/custom.css.
 skins:
   default:
+    css_class: persona-admin
     name: Default Theme
     colors:
       primary: "#007bff"
@@ -110,6 +123,7 @@ skins:
     font_family: "Arial, sans-serif"
 
   dark:
+    css_class: persona-developer
     name: Dark Theme
     colors:
       primary: "#0d6efd"
@@ -121,6 +135,7 @@ skins:
     font_family: "Arial, sans-serif"
 
   management:
+    css_class: persona-management
     name: Management Suite
     colors:
       primary: "#2563eb"
@@ -135,6 +150,7 @@ skins:
     font_weight: 500
 
   titanium:
+    css_class: persona-public_user
     name: Brushed Metal Titanium
     colors:
       primary: "#8b9dc3"
@@ -177,7 +193,6 @@ personas:
       - invoice-parser
     allowed_dash_apps:
       - phoenix-arize
-      - learning-platform
       - ollama-llm
       - ollama-chat
 

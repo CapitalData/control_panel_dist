@@ -272,11 +272,14 @@ def load_config():
         if not persona_data.get('name'):
             print(f"[CONFIG][WARN] Skipping persona '{persona_id}' missing name")
             continue
+        skin_id = persona_data.get('skin', 'default')
+        skin_def = config.get('skins', {}).get(skin_id, {})
+        theme_class = skin_def.get('css_class', f"persona-{persona_id}")
         personas[persona_id] = {
             "id": persona_id,
             "name": persona_data['name'],
             "description": persona_data.get('description', ''),
-            "theme_class": f"persona-{persona_id}",
+            "theme_class": theme_class,
             "allowed_tools": persona_data.get('allowed_tools', []),
             "allowed_dash_apps": persona_data.get('allowed_dash_apps', []),
         }
@@ -292,13 +295,16 @@ DASH_APPS = config['dash_apps']
 TOOL_LOOKUP = {tool["id"]: tool for tool in PYTHON_TOOLS}
 DASH_LOOKUP = {app["id"]: app for app in DASH_APPS}
 
-LLM_TOOL_IDS = set()
-LLM_DASH_IDS = {"phoenix-arize", "ollama-llm", "ollama-chat"}
-FINANCE_KEYWORDS = ("finance", "invoice", "billing", "payment", "ledger")
-MANAGER_DASH_IDS = {"invoice-tool", "finance-tracker"}
+_panel_groups = config.get('panel_groups', {})
+LLM_TOOL_IDS = set(_panel_groups.get('llm', {}).get('tool_ids') or [])
+LLM_DASH_IDS = set(_panel_groups.get('llm', {}).get('dash_ids') or [])
+FINANCE_TOOL_IDS = set(_panel_groups.get('finance', {}).get('tool_ids') or [])
+FINANCE_DASH_IDS = set(_panel_groups.get('finance', {}).get('dash_ids') or [])
+MANAGER_TOOL_IDS = set(_panel_groups.get('manager', {}).get('tool_ids') or [])
+MANAGER_DASH_IDS = set(_panel_groups.get('manager', {}).get('dash_ids') or [])
 DEFAULT_PHOENIX_PROJECT_NAME = os.environ.get(
     "CONTROL_PANEL_PHOENIX_PROJECT_NAME",
-    config.get("panel_groups", {}).get("llm", {}).get("project_name", "default"),
+    _panel_groups.get('llm', {}).get('project_name', 'default'),
 )
 
 DEFAULT_PERSONA_ID = os.environ.get("CONTROL_PANEL_DEFAULT_PERSONA", "admin").lower()
@@ -323,10 +329,6 @@ def get_persona(persona_id):
         return PERSONAS[persona_id]
     return PERSONAS["admin"]
 
-
-def _is_finance_id(item_id):
-    lowered = item_id.lower()
-    return any(keyword in lowered for keyword in FINANCE_KEYWORDS)
 
 # Global state management
 app_processes = {}
@@ -1130,14 +1132,8 @@ def build_dash_cards(app_ids):
 
 def build_llm_panel_cards(tool_ids, app_ids):
     """Render combined utility/reactor cards for LLM workflow."""
-    llm_tools = [
-        tool_id for tool_id in tool_ids
-        if tool_id in LLM_TOOL_IDS or not _is_finance_id(tool_id)
-    ]
-    llm_apps = [
-        app_id for app_id in app_ids
-        if app_id in LLM_DASH_IDS or not _is_finance_id(app_id)
-    ]
+    llm_tools = [tool_id for tool_id in tool_ids if tool_id in LLM_TOOL_IDS]
+    llm_apps = [app_id for app_id in app_ids if app_id in LLM_DASH_IDS]
 
     children = []
     if llm_tools:
@@ -1152,21 +1148,9 @@ def build_llm_panel_cards(tool_ids, app_ids):
 
 
 def build_finance_panel_cards(tool_ids, app_ids):
-    """Render combined utility/reactor cards for finance workflow.
-
-    NOTE: Apps claimed by the Manager panel (MANAGER_DASH_IDS) are excluded
-    here to avoid duplicate component IDs in the Dash layout, which would
-    break pattern-matching callbacks.
-    """
-    finance_tools = [
-        tool_id for tool_id in tool_ids
-        if _is_finance_id(tool_id) and tool_id not in LLM_TOOL_IDS
-    ]
-    finance_apps = [
-        app_id for app_id in app_ids
-        if _is_finance_id(app_id) and app_id not in LLM_DASH_IDS
-        and app_id not in MANAGER_DASH_IDS
-    ]
+    """Render combined utility/reactor cards for finance workflow."""
+    finance_tools = [tool_id for tool_id in tool_ids if tool_id in FINANCE_TOOL_IDS]
+    finance_apps = [app_id for app_id in app_ids if app_id in FINANCE_DASH_IDS]
 
     children = []
     if finance_tools:
@@ -1181,16 +1165,9 @@ def build_finance_panel_cards(tool_ids, app_ids):
 
 
 def build_manager_panel_cards(tool_ids, app_ids):
-    """Render management-focused cards: invoice workflow + finance dashboards.
-
-    NOTE: Only dash apps in MANAGER_DASH_IDS are rendered here.  Finance-related
-    tools stay in the Finance panel to avoid duplicate component IDs which break
-    pattern-matching callbacks.
-    """
-    manager_apps = [
-        app_id for app_id in app_ids
-        if app_id in MANAGER_DASH_IDS
-    ]
+    """Render management-focused cards driven by panel_groups.manager in apps_config.yaml."""
+    manager_tools = [tool_id for tool_id in tool_ids if tool_id in MANAGER_TOOL_IDS]
+    manager_apps = [app_id for app_id in app_ids if app_id in MANAGER_DASH_IDS]
 
     children = [
         dbc.Alert(
@@ -1216,6 +1193,9 @@ def build_manager_panel_cards(tool_ids, app_ids):
             },
         ),
     ]
+    if manager_tools:
+        children.append(html.H6("Management Utilities", className="status-text mb-3"))
+        children.extend(build_tool_cards(manager_tools))
     if manager_apps:
         children.append(html.H6("Operational Dashboards", className="status-text mb-3 mt-4"))
         children.extend(build_dash_cards(manager_apps))
