@@ -1,0 +1,50 @@
+{
+  "title": "Docs Workflow Fundamentals",
+  "description": "Checks understanding of why the Control Panel docs are moving from README to MkDocs.",
+  "learning_path": "devops_documentation",
+  "course_id": "cp-docs-101",
+  "file_id": "docs_workflow_quiz_01",
+  "trackable": true,
+  "questions": [
+    {
+      "question": "What is the primary benefit of reorganizing the Control Panel README into a MkDocs project?",
+      "options": [
+        "It automatically converts Python scripts into binaries",
+        "It creates a navigable doc site with search, themes, and permalinks",
+        "It reduces repository size by deleting historical READMEs",
+        "It forces every contributor to learn reStructuredText"
+      ],
+      "correct_answer": 1,
+      "explanation": "MkDocs converts Markdown content into a structured site with navigation, search, and theming so operators can find procedures faster."
+    },
+    {
+      "question": "Which audience segmentation is recommended before rewriting the docs?",
+      "options": [
+        "GPU vs CPU owners",
+        "Admin persona, Scientist persona, and Infrastructure operators",
+        "Front-end vs back-end developers",
+        "Finance vs Marketing stakeholders"
+      ],
+      "correct_answer": 1,
+      "explanation": "The documentation calls out three groups—admins, scientists, and infrastructure staff—so each sees the cockpit details relevant to them."
+    },
+    {
+      "question": "Where should supporting assets like diagrams or screenshots live in the new structure?",
+      "options": [
+        "Inside hidden Git submodules",
+        "In `docs/assets/` so MkDocs can bundle them",
+        "Only in Jupyter notebooks",
+        "In the `.github` folder to avoid being published"
+      ],
+      "correct_answer": 1,
+      "explanation": "Placing media inside `docs/assets/` keeps everything versioned alongside the Markdown and ensures MkDocs can copy them into the final site."
+    }
+  ],
+  "metadata": {
+    "difficulty": "beginner",
+    "estimated_time_minutes": 6,
+    "topics": ["documentation", "mkdocs", "information_architecture"],
+    "created_date": "2026-01-13",
+    "version": "1.0"
+  }
+}

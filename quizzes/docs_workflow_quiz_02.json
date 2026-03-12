@@ -1,0 +1,50 @@
+{
+  "title": "MkDocs Build Lifecycle",
+  "description": "Covers the local commands used to preview and publish the site.",
+  "learning_path": "devops_documentation",
+  "course_id": "cp-docs-201",
+  "file_id": "docs_workflow_quiz_02",
+  "trackable": true,
+  "questions": [
+    {
+      "question": "Which MkDocs command gives you a live preview with auto-reload?",
+      "options": [
+        "mkdocs build",
+        "mkdocs serve",
+        "mkdocs init",
+        "mkdocs gh-deploy"
+      ],
+      "correct_answer": 1,
+      "explanation": "`mkdocs serve` starts a local dev server on port 8000 and reloads whenever Markdown files change."
+    },
+    {
+      "question": "What does `mkdocs gh-deploy --force` do in this project?",
+      "options": [
+        "Builds docs and pushes the static site to the `gh-pages` branch",
+        "Creates Docker images for every Dash app",
+        "Runs pytest before allowing a merge",
+        "Installs Docusaurus dependencies"
+      ],
+      "correct_answer": 0,
+      "explanation": "The command builds the site and publishes it to the `gh-pages` branch, which GitHub Pages then serves."
+    },
+    {
+      "question": "Why is `mkdocs.yml` the key configuration file?",
+      "options": [
+        "It stores GitHub tokens securely",
+        "It declares navigation, theme, plugins, and markdown extensions",
+        "It contains compiled HTML",
+        "It defines the persona access rules for the Control Panel"
+      ],
+      "correct_answer": 1,
+      "explanation": "All MkDocs site settings—nav order, Material theme, search plugins, markdown extensions—are read from `mkdocs.yml`."
+    }
+  ],
+  "metadata": {
+    "difficulty": "beginner",
+    "estimated_time_minutes": 5,
+    "topics": ["mkdocs", "tooling", "static_sites"],
+    "created_date": "2026-01-13",
+    "version": "1.0"
+  }
+}
