@@ -295,16 +295,12 @@ DASH_APPS = config['dash_apps']
 TOOL_LOOKUP = {tool["id"]: tool for tool in PYTHON_TOOLS}
 DASH_LOOKUP = {app["id"]: app for app in DASH_APPS}
 
-_panel_groups = config.get('panel_groups', {})
-LLM_TOOL_IDS = set(_panel_groups.get('llm', {}).get('tool_ids') or [])
-LLM_DASH_IDS = set(_panel_groups.get('llm', {}).get('dash_ids') or [])
-FINANCE_TOOL_IDS = set(_panel_groups.get('finance', {}).get('tool_ids') or [])
-FINANCE_DASH_IDS = set(_panel_groups.get('finance', {}).get('dash_ids') or [])
-MANAGER_TOOL_IDS = set(_panel_groups.get('manager', {}).get('tool_ids') or [])
-MANAGER_DASH_IDS = set(_panel_groups.get('manager', {}).get('dash_ids') or [])
+PANEL_GROUPS = config.get('panel_groups', {})
+PANEL_TOOL_IDS = {k: set(v.get('tool_ids') or []) for k, v in PANEL_GROUPS.items()}
+PANEL_DASH_IDS = {k: set(v.get('dash_ids') or []) for k, v in PANEL_GROUPS.items()}
 DEFAULT_PHOENIX_PROJECT_NAME = os.environ.get(
     "CONTROL_PANEL_PHOENIX_PROJECT_NAME",
-    _panel_groups.get('llm', {}).get('project_name', 'default'),
+    PANEL_GROUPS.get('llm', {}).get('project_name', 'default'),
 )
 
 DEFAULT_PERSONA_ID = os.environ.get("CONTROL_PANEL_DEFAULT_PERSONA", "admin").lower()
@@ -1130,91 +1126,49 @@ def build_dash_cards(app_ids):
     return [_render_empty_panel("No reactors available for this persona.")]
 
 
-def build_llm_panel_cards(tool_ids, app_ids):
-    """Render combined utility/reactor cards for LLM workflow."""
-    llm_tools = [tool_id for tool_id in tool_ids if tool_id in LLM_TOOL_IDS]
-    llm_apps = [app_id for app_id in app_ids if app_id in LLM_DASH_IDS]
-
+def build_panel_cards(panel_key, tool_ids, app_ids):
+    """Build cards for a panel group, filtered to what the persona is allowed."""
+    allowed_tools = [t for t in tool_ids if t in PANEL_TOOL_IDS.get(panel_key, set())]
+    allowed_apps = [a for a in app_ids if a in PANEL_DASH_IDS.get(panel_key, set())]
     children = []
-    if llm_tools:
-        children.append(html.H6("LLM Utilities", className="status-text mb-3"))
-        children.extend(build_tool_cards(llm_tools))
-    if llm_apps:
-        children.append(html.H6("LLM Reactors", className="status-text mb-3 mt-4"))
-        children.extend(build_dash_cards(llm_apps))
-    if children:
-        return children
-    return [_render_empty_panel("No LLM tools/reactors assigned to this persona.")]
-
-
-def build_finance_panel_cards(tool_ids, app_ids):
-    """Render combined utility/reactor cards for finance workflow."""
-    finance_tools = [tool_id for tool_id in tool_ids if tool_id in FINANCE_TOOL_IDS]
-    finance_apps = [app_id for app_id in app_ids if app_id in FINANCE_DASH_IDS]
-
-    children = []
-    if finance_tools:
-        children.append(html.H6("Financial Utilities", className="status-text mb-3"))
-        children.extend(build_tool_cards(finance_tools))
-    if finance_apps:
-        children.append(html.H6("Financial Reactors", className="status-text mb-3 mt-4"))
-        children.extend(build_dash_cards(finance_apps))
-    if children:
-        return children
-    return [_render_empty_panel("No financial tools/reactors assigned to this persona.")]
-
-
-def build_manager_panel_cards(tool_ids, app_ids):
-    """Render management-focused cards driven by panel_groups.manager in apps_config.yaml."""
-    manager_tools = [tool_id for tool_id in tool_ids if tool_id in MANAGER_TOOL_IDS]
-    manager_apps = [app_id for app_id in app_ids if app_id in MANAGER_DASH_IDS]
-
-    children = [
-        dbc.Alert(
-            [
-                html.Strong("📋 MANAGEMENT OVERVIEW: ", style={"color": "#60a5fa"}),
-                html.Span(
-                    "Launch and monitor operational dashboards from this panel.",
-                    style={"color": "#cbd5e1"},
-                ),
-                html.Br(),
-                html.Span(
-                    "Recommended: Finance Tracker for reporting → Invoice Tool for workflow management.",
-                    style={"color": "#94a3b8", "fontSize": "11px"},
-                ),
-            ],
-            color="dark",
-            className="mb-4",
-            style={
-                "backgroundColor": "#0f172a",
-                "border": "2px solid #2563eb",
-                "borderRadius": "4px",
-                "fontFamily": "'Segoe UI', Arial, sans-serif",
-            },
-        ),
-    ]
-    if manager_tools:
-        children.append(html.H6("Management Utilities", className="status-text mb-3"))
-        children.extend(build_tool_cards(manager_tools))
-    if manager_apps:
-        children.append(html.H6("Operational Dashboards", className="status-text mb-3 mt-4"))
-        children.extend(build_dash_cards(manager_apps))
-    if len(children) == 1:  # only the alert, no real content
-        children.append(_render_empty_panel("No management tools assigned to this persona."))
+    if allowed_tools:
+        children.extend(build_tool_cards(allowed_tools))
+    if allowed_apps:
+        children.extend(build_dash_cards(allowed_apps))
+    if not children:
+        label = PANEL_GROUPS.get(panel_key, {}).get('label', panel_key)
+        children.append(_render_empty_panel(f"No items assigned to this persona for {label}."))
     return children
 
 
+def build_tabs_component(persona, active_tab=None):
+    """Build dbc.Tabs dynamically from panel_groups in apps_config.yaml."""
+    tabs = []
+    first_tab_id = None
+    for panel_key, panel_def in PANEL_GROUPS.items():
+        tab_id = panel_def.get('tab_id', f"{panel_key}-panel")
+        label = panel_def.get('label', panel_key)
+        if first_tab_id is None:
+            first_tab_id = tab_id
+        tabs.append(dbc.Tab(
+            html.Div(
+                build_panel_cards(panel_key, persona["allowed_tools"], persona["allowed_dash_apps"]),
+                id=f"{panel_key}-card-container",
+            ),
+            label=label,
+            tab_id=tab_id,
+            id=f"{panel_key}-tab",
+            label_style={"fontFamily": "'Courier New', monospace", "fontWeight": "bold"},
+        ))
+    resolved_active = active_tab or first_tab_id or "llm-panel"
+    return dbc.Tabs(tabs, id="tabs", active_tab=resolved_active, className="mb-4")
+
+
 initial_persona = get_persona(DEFAULT_PERSONA_ID)
-initial_llm_children = build_llm_panel_cards(
-    initial_persona["allowed_tools"], initial_persona["allowed_dash_apps"]
+initial_active_tab = next(
+    (v.get('tab_id', f"{k}-panel") for k, v in PANEL_GROUPS.items()),
+    "llm-panel",
 )
-initial_finance_children = build_finance_panel_cards(
-    initial_persona["allowed_tools"], initial_persona["allowed_dash_apps"]
-)
-initial_manager_children = build_manager_panel_cards(
-    initial_persona["allowed_tools"], initial_persona["allowed_dash_apps"]
-)
-initial_active_tab = "llm-panel"
 persona_switch_style = {} if ALLOW_PERSONA_SWITCH else {"display": "none"}
 initial_persona_chip = [
     html.Span("PERSONA", className="status-text me-2"),
@@ -1283,148 +1237,26 @@ app.layout = html.Div([
             # Warning stripe
             html.Div(className="warning-stripe mb-4"),
 
-            # Tabs styled as panel sections
-            dbc.Tabs([
-                dbc.Tab(
-                    [
-                        html.Div([
-                            html.Span("◈", style={"color": "#d4a017", "fontSize": "20px"}),
-                            html.Span(" LLM OPERATIONS ", className="label-plate mx-2"),
-                            html.Span("◈", style={"color": "#d4a017", "fontSize": "20px"}),
-                        ], className="text-center mb-4 mt-3"),
+            # Phoenix/Arize project name (LLM observability setting)
+            dbc.Row([
+                dbc.Col([
+                    dbc.Label("Phoenix Project", className="status-text mb-1"),
+                    dbc.Input(
+                        id="phoenix-project-input",
+                        type="text",
+                        value=DEFAULT_PHOENIX_PROJECT_NAME,
+                        debounce=True,
+                        placeholder="default",
+                    ),
+                    html.Small(
+                        "Traces from Ollama Chat will be tagged to this project.",
+                        style={"color": "#888", "fontFamily": "'Courier New', monospace"},
+                    ),
+                ], width=6),
+            ], className="mb-4"),
 
-                        dbc.Alert(
-                            [
-                                html.Strong("Recommended LLM startup order: ", style={"color": "#d4a017"}),
-                                html.Span("1) Phoenix/Arize  →  2) Ollama  →  3) Ollama Chat UI", style={"color": "#ccc"}),
-                                html.Br(),
-                                html.Span("Breadcrumb: Observability first, model second, interface third.", style={"color": "#888", "fontSize": "11px"}),
-                            ],
-                            color="dark",
-                            className="mb-4",
-                            style={
-                                "backgroundColor": "#1a1a1a",
-                                "border": "2px solid #d4a017",
-                                "borderRadius": "4px",
-                                "fontFamily": "'Courier New', monospace",
-                            },
-                        ),
-
-                        dbc.Row(
-                            [
-                                dbc.Col(
-                                    [
-                                        dbc.Label("Phoenix Project", className="status-text mb-1"),
-                                        dbc.Input(
-                                            id="phoenix-project-input",
-                                            type="text",
-                                            value=DEFAULT_PHOENIX_PROJECT_NAME,
-                                            debounce=True,
-                                            placeholder="default",
-                                        ),
-                                        html.Small(
-                                            "Traces from Ollama Chat will be tagged to this project.",
-                                            style={"color": "#888", "fontFamily": "'Courier New', monospace"},
-                                        ),
-                                    ],
-                                    width=12,
-                                )
-                            ],
-                            className="mb-3",
-                        ),
-
-                        html.Div(initial_llm_children, id="llm-card-container"),
-                    ],
-                    label="🧠 LLM PANEL",
-                    tab_id="llm-panel",
-                    id="llm-tab",
-                    label_style={
-                        "fontFamily": "'Courier New', monospace",
-                        "fontWeight": "bold",
-                    },
-                ),
-
-                dbc.Tab(
-                    [
-                        html.Div([
-                            html.Span("◈", style={"color": "#d4a017", "fontSize": "20px"}),
-                            html.Span(
-                                " FINANCIAL OPERATIONS ",
-                                className="label-plate mx-2",
-                            ),
-                            html.Span("◈", style={"color": "#d4a017", "fontSize": "20px"}),
-                        ], className="text-center mb-3 mt-3"),
-
-                        # Technical note alert
-                        dbc.Alert(
-                            [
-                                html.Div(
-                                    [
-                                        html.Strong(
-                                            "⚠ OPERATOR NOTICE: ",
-                                            style={"color": "#d4a017"},
-                                        ),
-                                        html.Span(
-                                            "Applications run in isolated subprocess mode. ",
-                                            style={"color": "#ccc"},
-                                        ),
-                                        html.Span(
-                                            "Flask reloader disabled (WERKZEUG_RUN_MAIN=true). ",
-                                            style={"color": "#888", "fontSize": "11px"},
-                                        ),
-                                        html.Span(
-                                            "Hot-reload unavailable when launched from Control Station.",
-                                            style={"color": "#888", "fontSize": "11px"},
-                                        ),
-                                    ],
-                                    style={
-                                        "fontFamily": "'Courier New', monospace",
-                                        "fontSize": "12px",
-                                    },
-                                )
-                            ],
-                            color="dark",
-                            className="mb-4",
-                            style={
-                                "backgroundColor": "#1a1a1a",
-                                "border": "2px solid #d4a017",
-                                "borderRadius": "4px",
-                            },
-                        ),
-
-                        html.Div(initial_finance_children, id="finance-card-container"),
-                    ],
-                    label="💰 FINANCE PANEL",
-                    tab_id="finance-panel",
-                    id="finance-tab",
-                    label_style={
-                        "fontFamily": "'Courier New', monospace",
-                        "fontWeight": "bold",
-                    },
-                ),
-
-                dbc.Tab(
-                    [
-                        html.Div([
-                            html.Span("◈", style={"color": "#3b82f6", "fontSize": "20px"}),
-                            html.Span(
-                                " MANAGER TOOLS ",
-                                className="label-plate mx-2",
-                            ),
-                            html.Span("◈", style={"color": "#3b82f6", "fontSize": "20px"}),
-                        ], className="text-center mb-3 mt-3"),
-
-                        html.Div(initial_manager_children, id="manager-card-container"),
-                    ],
-                    label="📋 MANAGER TOOLS",
-                    tab_id="manager-panel",
-                    id="manager-tab",
-                    label_style={
-                        "fontFamily": "'Segoe UI', Arial, sans-serif",
-                        "fontWeight": "bold",
-                    },
-                ),
-            ], id="tabs", active_tab=initial_active_tab, className="mb-4"),
+            # Tabs — composed from panel_groups in apps_config.yaml
+            html.Div(id="tabs-wrapper", children=build_tabs_component(initial_persona, initial_active_tab)),
 
             # Footer with status
             html.Div([
@@ -1496,44 +1328,31 @@ def toggle_live_polling(n_clicks):
 @callback(
     Output("active-persona", "data"),
     Output("persona-root", "className"),
-    Output("llm-card-container", "children"),
-    Output("finance-card-container", "children"),
-    Output("manager-card-container", "children"),
     Output("persona-chip", "children"),
-    Output("tabs", "active_tab"),
+    Output("tabs-wrapper", "children"),
     Input("persona-select", "value"),
     prevent_initial_call=False,
 )
 def update_persona_view(selected_persona):
-    """Swap themes and visible panels when the persona selector changes."""
+    """Swap theme and rebuild tabs when persona selector changes."""
     persona_key = (selected_persona or DEFAULT_PERSONA_ID).lower()
     persona = get_persona(persona_key)
 
-    llm_children = build_llm_panel_cards(
-        persona["allowed_tools"], persona["allowed_dash_apps"]
-    )
-    finance_children = build_finance_panel_cards(
-        persona["allowed_tools"], persona["allowed_dash_apps"]
-    )
-    manager_children = build_manager_panel_cards(
-        persona["allowed_tools"], persona["allowed_dash_apps"]
-    )
+    root_class = f"persona-wrapper {persona['theme_class']}"
     persona_chip = [
         html.Span("PERSONA", className="status-text me-2"),
         html.Span(persona["name"], className="persona-chip__name"),
         html.Span(persona["description"], className="persona-chip__desc ms-2"),
     ]
-    root_class = f"persona-wrapper {persona['theme_class']}"
-    active_tab = "manager-panel" if persona_key == "management" else "llm-panel"
+    management_tab = PANEL_GROUPS.get('manager', {}).get('tab_id', 'manager-panel')
+    first_tab = next((v.get('tab_id', f"{k}-panel") for k, v in PANEL_GROUPS.items()), "llm-panel")
+    active_tab = management_tab if persona_key == "management" else first_tab
 
     return (
         persona["id"],
         root_class,
-        llm_children,
-        finance_children,
-        manager_children,
         persona_chip,
-        active_tab,
+        build_tabs_component(persona, active_tab),
     )
 
 

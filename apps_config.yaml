@@ -225,6 +225,7 @@ personas:
       - ollama-llm
       - ollama-chat
       - invoice-tool
+      - daily-use-aggregator
 
   public_user:
     name: Public User
