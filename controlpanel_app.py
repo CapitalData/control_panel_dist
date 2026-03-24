@@ -34,6 +34,7 @@ Styled as a retro tank/industrial control panel with:
 """
 import os
 import shlex
+import signal
 import shutil
 import socket
 import subprocess
@@ -373,6 +374,46 @@ def init_state():
         proxy_last_check[app_config["id"]] = 0
 
 init_state()
+
+
+# ── Control panel self-log capture ───────────────────────────────────────────
+_SELF_LOG_LINES: list = []
+_SELF_LOG_LOCK = threading.Lock()
+_MAX_SELF_LOG = 200
+
+
+class _TeeStream:
+    """Tee writes to the original stream AND the in-memory self-log buffer."""
+    def __init__(self, original):
+        self._original = original
+
+    def write(self, text):
+        self._original.write(text)
+        self._original.flush()
+        if text and text.strip():
+            ts = datetime.now().strftime('%H:%M:%S')
+            with _SELF_LOG_LOCK:
+                _SELF_LOG_LINES.append(f"[{ts}] {text.rstrip()}")
+                if len(_SELF_LOG_LINES) > _MAX_SELF_LOG:
+                    del _SELF_LOG_LINES[:-_MAX_SELF_LOG]
+
+    def flush(self):
+        self._original.flush()
+
+    def __getattr__(self, name):
+        return getattr(self._original, name)
+
+
+def _add_self_log(text: str):
+    """Append a message directly to the self-log buffer."""
+    ts = datetime.now().strftime('%H:%M:%S')
+    with _SELF_LOG_LOCK:
+        _SELF_LOG_LINES.append(f"[{ts}] {text}")
+        if len(_SELF_LOG_LINES) > _MAX_SELF_LOG:
+            del _SELF_LOG_LINES[:-_MAX_SELF_LOG]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 def sanitize_output_text(value):
@@ -1092,6 +1133,76 @@ def create_dash_app_card(app_config):
     ], className="gauge-panel military-panel mb-4", style={"position": "relative", "padding": "30px"})
 
 
+def create_self_panel():
+    """A status + log panel for the control panel process itself."""
+    return html.Div([
+        html.Div(className="screw screw-tl"),
+        html.Div(className="screw screw-tr"),
+        html.Div(className="screw screw-bl"),
+        html.Div(className="screw screw-br"),
+        html.Div([
+            html.Div([
+                html.Span("CONTROL STATION PROCESS", className="label-plate me-2"),
+                html.Span(
+                    f"PORT 8060  \u2022  PID {os.getpid()}",
+                    style={
+                        "color": "#00ff00", "fontFamily": "'Courier New', monospace",
+                        "fontSize": "12px", "backgroundColor": "#111",
+                        "padding": "4px 8px", "borderRadius": "3px",
+                        "border": "1px solid #00ff00",
+                    }
+                ),
+            ], className="mb-3 d-flex align-items-center"),
+            dbc.Row([
+                dbc.Col([
+                    html.Div([
+                        html.Div([
+                            html.Span(
+                                "\u25cf",
+                                id="self-indicator",
+                                style={
+                                    "color": "#00ff00", "fontSize": "28px",
+                                    "textShadow": "0 0 10px rgba(0,255,0,0.8)",
+                                }
+                            ),
+                        ], className="indicator-housing"),
+                        html.Div("ONLINE", className="status-text mt-1"),
+                    ], className="text-center"),
+                ], width=2),
+                dbc.Col([
+                    html.Small(
+                        "This panel's own process. Restart to reload config changes; Force Kill to shut down the station.",
+                        style={"color": "#888", "fontFamily": "'Courier New', monospace", "fontSize": "11px"},
+                    ),
+                ], width=6),
+                dbc.Col([
+                    dbc.Button("\u21ba RESTART", id="self-restart-btn", color="warning",
+                               size="sm", className="w-100 mb-2"),
+                    dbc.Button("\u26a0 FORCE KILL", id="self-kill-btn", color="danger",
+                               size="sm", className="w-100 kill-button"),
+                ], width=4),
+            ], className="align-items-center"),
+            html.Div(className="warning-stripe mt-3"),
+            html.Div([
+                html.Div([
+                    html.Span("\u25c4 ", style={"color": "#d4a017"}),
+                    html.Span("STATION LOG", className="status-text"),
+                    html.Span(" \u25ba", style={"color": "#d4a017"}),
+                ], className="text-center mb-2"),
+                html.Div(
+                    id="self-log-output",
+                    className="terminal-output",
+                    style={
+                        "padding": "12px", "borderRadius": "4px",
+                        "fontSize": "11px", "maxHeight": "180px",
+                        "overflowY": "auto", "whiteSpace": "pre-wrap",
+                    },
+                ),
+            ], className="mt-3"),
+        ], className="p-3"),
+    ], className="gauge-panel military-panel mb-4", style={"position": "relative", "padding": "30px"})
+
+
 def _render_empty_panel(message):
     """Display a themed alert when a persona has no panels for a section."""
     return dbc.Alert(
@@ -1254,6 +1365,9 @@ app.layout = html.Div([
                     ),
                 ], width=6),
             ], className="mb-4"),
+
+            # Control panel self-process monitor
+            create_self_panel(),
 
             # Tabs — composed from panel_groups in apps_config.yaml
             html.Div(id="tabs-wrapper", children=build_tabs_component(initial_persona, initial_active_tab)),
@@ -1595,7 +1709,39 @@ def handle_dash_app(checked, proxy_checked, kill_value, n, app_id_dict, project_
         kill_value_reset,
     )
 
+@callback(
+    Output("self-log-output", "children"),
+    Input("status-update", "n_intervals"),
+    Input("self-kill-btn", "n_clicks"),
+    Input("self-restart-btn", "n_clicks"),
+    prevent_initial_call=False,
+)
+def handle_self_panel(n_intervals, kill_clicks, restart_clicks):
+    """Refresh the station log and handle kill / restart of the panel process."""
+    triggered = ctx.triggered_id
+
+    if triggered == "self-kill-btn" and kill_clicks:
+        _add_self_log("\u26a0 FORCE KILL requested \u2014 sending SIGTERM to this process")
+        threading.Thread(
+            target=lambda: (time.sleep(0.4), os.kill(os.getpid(), signal.SIGTERM)),
+            daemon=True,
+        ).start()
+    elif triggered == "self-restart-btn" and restart_clicks:
+        _add_self_log("\u21ba RESTART requested \u2014 re-launching process")
+        def _do_restart():
+            time.sleep(0.4)
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        threading.Thread(target=_do_restart, daemon=True).start()
+
+    with _SELF_LOG_LOCK:
+        lines = list(_SELF_LOG_LINES)
+    return sanitize_output_text("\n".join(lines) if lines else "Awaiting log output...")
+
+
 if __name__ == "__main__":
+    sys.stdout = _TeeStream(sys.stdout)
+    sys.stderr = _TeeStream(sys.stderr)
+    _add_self_log(f"\U0001f39b\ufe0f  Control Panel starting \u2014 PID {os.getpid()} on http://localhost:8060")
     print("🎛️  Control Panel starting on http://localhost:8060")
     print("=" * 50)
     app.run(debug=True, port=8060)

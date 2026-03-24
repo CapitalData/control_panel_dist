@@ -21,6 +21,12 @@ python_tools:
     #type: notebook
     #description: Generate invoices (Jupyter Notebook)
 
+  - id: kb-flow-analysis
+    name: KanbanFlow Hours Analysis
+    path: finance_tracker/KB_Flow_analysis.ipynb
+    type: notebook
+    description: Direct API pull of KanbanFlow hours → SQLite → Dash dashboard / Google Sheets sync
+
 dash_apps:
   - id: phoenix-arize
     name: Phoenix/Arize Traces
@@ -102,7 +108,9 @@ panel_groups:
   finance:
     label: "💰 FINANCE PANEL"
     tab_id: finance-panel
-    tool_ids: []
+    tool_ids:
+      - kb-flow-analysis
+      - invoice-parser
     dash_ids:
       - finance-tracker
       - invoice-tool
@@ -117,8 +125,7 @@ panel_groups:
   manager:
     label: "📋 MANAGER TOOLS"
     tab_id: manager-panel
-    tool_ids:
-      - invoice-parser
+    tool_ids: []
     dash_ids:
 
 
@@ -194,6 +201,22 @@ personas:
     allowed_tools:
       - invoice-parser
       - invoice-generation
+      - kb-flow-analysis
+    allowed_dash_apps:
+      - phoenix-arize
+      - finance-tracker
+      - dash-cards
+      - ollama-llm
+      - ollama-chat
+      - invoice-tool
+
+  BDSG:
+    name: Administrator
+    skin: default
+    allowed_tools:
+      - invoice-parser
+      - invoice-generation
+      - kb-flow-analysis
     allowed_dash_apps:
       - phoenix-arize
       - finance-tracker
