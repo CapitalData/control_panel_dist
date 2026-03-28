@@ -124,7 +124,7 @@ panel_groups:
     tool_ids: []
     dash_ids:
       - daily-use-aggregator
-
+      - learning-platform
   manager:
     label: "📋 MANAGER TOOLS"
     tab_id: manager-panel
@@ -237,6 +237,7 @@ personas:
       - invoice-parser
       - ollama-llm
       - ollama-chat
+      - learning-platform
 
   management:
     name: Management
