@@ -162,12 +162,12 @@ def _find_pids_listening_on_port(port):
 
     # Fallback: iterate processes we can access
     try:
-        for proc in psutil.process_iter(['pid']):
-            pid = proc.info.get('pid')
+        for conn in psutil.net_connections(kind='inet'):
+            pid = conn.pid
             if pid is None:
                 continue
             try:
-                for conn in proc.connections(kind='inet'):
+                if True:
                     laddr = getattr(conn, "laddr", None)
                     if not laddr:
                         continue
@@ -529,11 +529,10 @@ def start_dash_app(app_id, extra_env=None):
     try:
         # Check if port is available (some apps can attach to an existing listener)
         allow_port_in_use = app_id in {"ollama-llm", "phoenix-arize"}
-        for proc in psutil.process_iter(['pid', 'name']):
+        for conn in psutil.net_connections():
             try:
-                for conn in proc.connections():
-                    if conn.laddr.port == app_config["port"]:
-                        if allow_port_in_use:
+                if conn.laddr and conn.laddr.port == app_config["port"]:
+                    if allow_port_in_use:
                             app_outputs.setdefault(app_id, [])
                             app_outputs[app_id].append(
                                 f"[{datetime.now().strftime('%H:%M:%S')}] Port {app_config['port']} already in use; attaching to existing service"
