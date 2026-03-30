@@ -40,33 +40,6 @@ dash_apps:
       env_prefix: LEARNING_PLATFORM
       remote_port: 19050
 
-  - id: finance-tracker
-    name: Finance Tracker (finance_tracker_app.py)
-    path: finance_tracker/finance_tracker_app.py
-    port: 8051
-    description: Financial tracking and visualization dashboard — daily metrics, historical trends, Google Sheets integration
-    reverse_proxy:
-      env_prefix: FINANCE_TRACKER
-      remote_port: 19051
-
-  - id: invoice-tool
-    name: Invoice Tool (invoice_tracker_app.py)
-    path: finance_tracker/invoice_tracker_app.py
-    port: 8049
-    description: Invoice workflow manager — Drive integration, Invoice Manager, Job Manager, QuickBooks sync
-    reverse_proxy:
-      env_prefix: INVOICE_PROCESSOR
-      remote_port: 19053
-
-  - id: invoice-parser
-    name: Invoice Parser
-    path: finance_tracker/invoice-parser/src/invoice_parser.py
-    port: 8070
-    description: Parse PDF invoices with LLM extraction and export to Google Sheets
-    reverse_proxy:
-      env_prefix: INVOICE_PARSER
-      remote_port: 19070
-
   - id: ollama-llm
     name: ollama-llm Frontend
     path: ollama_llm/app.py
@@ -85,15 +58,6 @@ dash_apps:
       env_prefix: OLLAMA_CHAT
       remote_port: 19054
 
-  - id: daily-use-aggregator
-    name: Daily Use Aggregator
-    path: daily_use_aggregator/app.py
-    port: 8052
-    description: Wiki (Outline), Notes (Obsidian), Email client, and Checklists with history replay
-    reverse_proxy:
-      env_prefix: DAILY_USE_AGGREGATOR
-      remote_port: 19052
-
 # Panel Grouping - Controls which tab each tool/app appears in.
 # Each panel must have explicit tool_ids and dash_ids lists.
 # Ordering within each list determines card render order.
@@ -108,18 +72,8 @@ panel_groups:
       - ollama-chat
     project_name: default
 
-  finance:
-    label: "💰 FINANCE PANEL"
-    tab_id: finance-panel
-    tool_ids:
-      - kb-flow-analysis
-    dash_ids:
-      - invoice-parser
-      - finance-tracker
-      - invoice-tool
-
-  daily:
-    label: "🗂️ DAILY TOOLS"
+  Developer:
+    label: "🗂️ Developer TOOLS"
     tab_id: daily-panel
     tool_ids: []
     dash_ids:
@@ -160,61 +114,10 @@ skins:
       border: "#404040"
     font_family: "Arial, sans-serif"
 
-  management:
-    css_class: persona-management
-    name: Management Suite
-    colors:
-      primary: "#2563eb"
-      secondary: "#64748b"
-      background: "#0f172a"
-      surface: "#1e293b"
-      text: "#e2e8f0"
-      border: "#334155"
-      accent: "#3b82f6"
-      highlight: "#60a5fa"
-    font_family: "'Segoe UI', 'Roboto', Arial, sans-serif"
-    font_weight: 500
-
-  titanium:
-    css_class: persona-public_user
-    name: Brushed Metal Titanium
-    colors:
-      primary: "#8b9dc3"
-      secondary: "#7a8a9e"
-      background: "#c8d0d8"
-      surface: "#dfe3e8"
-      text: "#2c3e50"
-      border: "#9ea7b0"
-      accent: "#b0bec5"
-      highlight: "#a3b4c7"
-    texture:
-      pattern: "linear-gradient(135deg, #c8d0d8 0%, #dfe3e8 25%, #c8d0d8 50%, #dfe3e8 75%, #c8d0d8 100%)"
-      overlay: "repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 2px)"
-    metallic:
-      shine: "linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, rgba(0,0,0,0.1) 100%)"
-      shadow: "0 2px 4px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.3)"
-    font_family: "'Segoe UI', 'Roboto', sans-serif"
-    font_weight: 500
-
 # User Personas - Define which apps each user type can access
 personas:
   admin:
     name: Administrator
-    skin: default
-    allowed_tools:
-      - invoice-generation
-      - kb-flow-analysis
-    allowed_dash_apps:
-      - phoenix-arize
-      - finance-tracker
-      - invoice-parser
-      - dash-cards
-      - ollama-llm
-      - ollama-chat
-      - invoice-tool
-
-  BDSG:
-    name: BDSG
     skin: default
     allowed_tools:
       - invoice-generation
@@ -253,13 +156,3 @@ personas:
       - ollama-chat
       - invoice-tool
       - daily-use-aggregator
-
-  public_user:
-    name: Public User
-    skin: titanium
-    allowed_tools: []
-    allowed_dash_apps:
-      - phoenix-arize
-      - invoice-parser
-      - ollama-llm
-      - ollama-chat
