@@ -215,7 +215,7 @@ def load_config():
             "Please create apps_config.yaml in the control_panel directory."
         )
     
-    with open(config_path, 'r') as f:
+    with open(config_path, 'r', encoding='utf-8') as f:
         config = yaml.safe_load(f)
 
     if not isinstance(config, dict):
@@ -388,7 +388,11 @@ class _TeeStream:
         self._original = original
 
     def write(self, text):
-        self._original.write(text)
+        try:
+            self._original.write(text)
+        except UnicodeEncodeError:
+            enc = getattr(self._original, 'encoding', 'utf-8') or 'utf-8'
+            self._original.write(text.encode(enc, errors='replace').decode(enc))
         self._original.flush()
         if text and text.strip():
             ts = datetime.now().strftime('%H:%M:%S')
@@ -533,14 +537,14 @@ def start_dash_app(app_id, extra_env=None):
             try:
                 if conn.laddr and conn.laddr.port == app_config["port"]:
                     if allow_port_in_use:
-                            app_outputs.setdefault(app_id, [])
-                            app_outputs[app_id].append(
-                                f"[{datetime.now().strftime('%H:%M:%S')}] Port {app_config['port']} already in use; attaching to existing service"
-                            )
-                            if len(app_outputs[app_id]) > 100:
-                                app_outputs[app_id] = app_outputs[app_id][-100:]
-                            break
-                        return False, f"Port {app_config['port']} already in use"
+                        app_outputs.setdefault(app_id, [])
+                        app_outputs[app_id].append(
+                            f"[{datetime.now().strftime('%H:%M:%S')}] Port {app_config['port']} already in use; attaching to existing service"
+                        )
+                        if len(app_outputs[app_id]) > 100:
+                            app_outputs[app_id] = app_outputs[app_id][-100:]
+                        break
+                    return False, f"Port {app_config['port']} already in use"
             except (psutil.AccessDenied, psutil.NoSuchProcess):
                 pass
         
@@ -559,7 +563,7 @@ def start_dash_app(app_id, extra_env=None):
             stderr=subprocess.STDOUT,
             cwd=app_config["path"].parent,
             env=env,
-            bufsize=1,
+            bufsize=-1,
             close_fds=True,
             start_new_session=True
         )
@@ -1552,6 +1556,7 @@ def handle_python_tool(checked, kill_clicks, n, tool_id_dict, project_name):
     Output({"type": "proxy-indicator", "index": MATCH}, "style"),
     Output({"type": "proxy-status", "index": MATCH}, "children"),
     Output({"type": "dash-kill", "index": MATCH}, "value"),
+    Output({"type": "dash-checkbox", "index": MATCH}, "value"),
     Input({"type": "dash-checkbox", "index": MATCH}, "value"),
     Input({"type": "proxy-checkbox", "index": MATCH}, "value"),
     Input({"type": "dash-kill", "index": MATCH}, "value"),
@@ -1702,7 +1707,7 @@ def handle_dash_app(checked, proxy_checked, kill_value, n, app_id_dict, project_
             and previous_state.get("proxy_state") == state
             and previous_state.get("proxy_message") == proxy_status_text
         ):
-            return no_update, no_update, no_update, no_update, no_update, no_update, no_update
+            return no_update, no_update, no_update, no_update, no_update, no_update, no_update, no_update
 
     ui_render_state[app_id] = {
         "running": is_running,
@@ -1712,13 +1717,14 @@ def handle_dash_app(checked, proxy_checked, kill_value, n, app_id_dict, project_
     }
     
     return (
-        checked and True,
+        is_running,
         indicator_style,
         link_style,
         output_text,
         proxy_indicator_style,
         proxy_status_text,
         kill_value_reset,
+        is_running,
     )
 
 @callback(
@@ -1754,6 +1760,17 @@ if __name__ == "__main__":
     sys.stdout = _TeeStream(sys.stdout)
     sys.stderr = _TeeStream(sys.stderr)
     _add_self_log(f"\U0001f39b\ufe0f  Control Panel starting \u2014 PID {os.getpid()} on http://localhost:8060")
-    print("🎛️  Control Panel starting on http://localhost:8060")
     print("=" * 50)
+    print("  Control Panel starting...")
+    print("  URL: http://localhost:8060")
+    print("=" * 50)
+
+    # Open browser automatically once the server is ready (only in the worker process)
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        def _open_browser():
+            time.sleep(2)
+            import webbrowser
+            webbrowser.open("http://localhost:8060")
+        threading.Thread(target=_open_browser, daemon=True).start()
+
     app.run(debug=True, port=8060)
