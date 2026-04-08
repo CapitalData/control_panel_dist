@@ -9,11 +9,11 @@
 python_tools:
   ### notebook that scans all data and generates invioice for unpaid
   ## check GIU and components for invoice generation notebook and add here if needed
-  - #id: invoice-generation
-    #name: Invoice Generator
-    #path: invoice_generation/Invoice_generator.ipynb
-    #type: notebook
-    #description: Generate invoices (Jupyter Notebook)
+  # - id: invoice-generation
+  #   name: Invoice Generator
+  #   path: invoice_generation/Invoice_generator.ipynb
+  #   type: notebook
+  #   description: Generate invoices (Jupyter Notebook)
 
   - id: kb-flow-analysis
     name: KanbanFlow Hours Analysis

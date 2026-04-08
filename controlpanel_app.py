@@ -376,6 +376,31 @@ def init_state():
 init_state()
 
 
+def _detect_already_running():
+    """On startup, mark any dash apps whose port is already listening as running."""
+    listening_ports = set()
+    try:
+        for conn in psutil.net_connections():
+            try:
+                if conn.laddr:
+                    listening_ports.add(conn.laddr.port)
+            except (psutil.AccessDenied, psutil.NoSuchProcess):
+                pass
+    except Exception:
+        # psutil.net_connections() requires admin on some Windows setups — skip detection
+        return
+
+    for app_config in DASH_APPS:
+        if app_config["port"] in listening_ports:
+            app_status[app_config["id"]] = "running"
+            app_outputs[app_config["id"]] = [
+                f"[{datetime.now().strftime('%H:%M:%S')}] Detected {app_config['name']} already running on port {app_config['port']}"
+            ]
+            ui_render_state[app_config["id"]]["running"] = True
+
+_detect_already_running()
+
+
 # ── Control panel self-log capture ───────────────────────────────────────────
 _SELF_LOG_LINES: list = []
 _SELF_LOG_LOCK = threading.Lock()
@@ -461,6 +486,14 @@ def read_output(process, app_id):
                     app_outputs[app_id] = app_outputs[app_id][-100:]
     except Exception as e:
         app_outputs[app_id].append(f"[ERROR] {str(e)}")
+    finally:
+        # Process has exited — update status so UI reflects it
+        exit_code = process.poll()
+        if app_status.get(app_id) == "running":
+            app_status[app_id] = "stopped"
+            app_outputs[app_id].append(
+                f"[{datetime.now().strftime('%H:%M:%S')}] Process exited (code {exit_code})"
+            )
 
 def start_python_tool(tool_id, extra_env=None):
     """Start a Python tool"""
@@ -531,22 +564,26 @@ def start_dash_app(app_id, extra_env=None):
         return False, "Already running"
     
     try:
-        # Check if port is available (some apps can attach to an existing listener)
-        allow_port_in_use = app_id in {"ollama-llm", "phoenix-arize"}
-        for conn in psutil.net_connections():
-            try:
-                if conn.laddr and conn.laddr.port == app_config["port"]:
-                    if allow_port_in_use:
-                        app_outputs.setdefault(app_id, [])
-                        app_outputs[app_id].append(
-                            f"[{datetime.now().strftime('%H:%M:%S')}] Port {app_config['port']} already in use; attaching to existing service"
-                        )
-                        if len(app_outputs[app_id]) > 100:
-                            app_outputs[app_id] = app_outputs[app_id][-100:]
+        # Check if port is already in use — attach to existing process rather than failing
+        port_in_use = False
+        try:
+            for conn in psutil.net_connections():
+                try:
+                    if conn.laddr and conn.laddr.port == app_config["port"]:
+                        port_in_use = True
                         break
-                    return False, f"Port {app_config['port']} already in use"
-            except (psutil.AccessDenied, psutil.NoSuchProcess):
-                pass
+                except (psutil.AccessDenied, psutil.NoSuchProcess):
+                    pass
+        except Exception:
+            port_in_use = False  # Can't determine — proceed with normal launch
+
+        if port_in_use:
+            # Attach to existing process (works for all apps — avoids double-start)
+            app_outputs[app_id] = [
+                f"[{datetime.now().strftime('%H:%M:%S')}] Port {app_config['port']} already in use; attached to existing service"
+            ]
+            app_status[app_id] = "running"
+            return True, "Attached to existing process"
         
         env = os.environ.copy()
         # Remove Flask/Werkzeug reloader environment variables
