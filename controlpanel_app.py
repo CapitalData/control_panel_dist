@@ -207,7 +207,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 def load_config():
     """Load application configuration from YAML file."""
-    config_path = Path(__file__).parent / "apps_config.yaml"
+    config_name = os.environ.get("CONTROL_PANEL_CONFIG", "apps_config.yaml")
+    config_path = Path(__file__).parent / config_name
     
     if not config_path.exists():
         raise FileNotFoundError(
@@ -1799,7 +1800,8 @@ if __name__ == "__main__":
     _add_self_log(f"\U0001f39b\ufe0f  Control Panel starting \u2014 PID {os.getpid()} on http://localhost:8060")
     print("=" * 50)
     print("  Control Panel starting...")
-    print("  URL: http://localhost:8060")
+    _port = int(os.environ.get("CONTROL_PANEL_PORT", 8060))
+    print(f"  URL: http://localhost:{_port}")
     print("=" * 50)
 
     # Open browser automatically once the server is ready (only in the worker process)
@@ -1807,7 +1809,7 @@ if __name__ == "__main__":
         def _open_browser():
             time.sleep(2)
             import webbrowser
-            webbrowser.open("http://localhost:8060")
+            webbrowser.open(f"http://localhost:{_port}")
         threading.Thread(target=_open_browser, daemon=True).start()
 
-    app.run(debug=True, port=8060)
+    app.run(debug=True, port=_port)

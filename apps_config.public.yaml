@@ -1,0 +1,82 @@
+# Control Panel – Public Profile
+# ================================
+# Loaded when CONTROL_PANEL_CONFIG=apps_config.public.yaml
+# Run via: ./run_control_panel.sh --public  (serves on port 8061)
+#
+# This profile is for the externally-proxied interface.
+# Exposes only the learning platform and LLM tools.
+# Internal tools (finance, invoice, admin) are intentionally excluded.
+
+python_tools: []
+
+dash_apps:
+  - id: learning-platform
+    name: Learning Platform
+    path: learning_platform/app.py
+    port: 8050
+    description: Educational platform with courses and materials
+    reverse_proxy:
+      env_prefix: LEARNING_PLATFORM
+      remote_port: 19050
+
+  - id: ollama-llm
+    name: Ollama LLM
+    path: ollama_llm/app.py
+    port: 11434
+    description: Ollama LLM frontend
+    reverse_proxy:
+      env_prefix: OLLAMA_LLM
+      remote_port: 19053
+
+  - id: ollama-chat
+    name: Ollama Chat
+    path: ollama_llm/ollama_chat_app.py
+    port: 11500
+    description: Chat interface for Ollama
+    reverse_proxy:
+      env_prefix: OLLAMA_CHAT
+      remote_port: 19054
+
+# Panel Grouping
+panel_groups:
+  learning:
+    label: "📚 Learning"
+    tab_id: learning-panel
+    tool_ids: []
+    dash_ids:
+      - learning-platform
+    project_name: default
+
+  llm:
+    label: "🧠 LLM Tools"
+    tab_id: llm-panel
+    tool_ids: []
+    dash_ids:
+      - ollama-llm
+      - ollama-chat
+    project_name: default
+
+# Skins – single public theme only
+skins:
+  default:
+    css_class: persona-admin
+    name: Default Theme
+    colors:
+      primary: "#007bff"
+      secondary: "#6c757d"
+      background: "#ffffff"
+      surface: "#f8f9fa"
+      text: "#212529"
+      border: "#dee2e6"
+    font_family: "Arial, sans-serif"
+
+# Personas – single public user role
+personas:
+  user:
+    name: User
+    skin: default
+    allowed_tools: []
+    allowed_dash_apps:
+      - learning-platform
+      - ollama-llm
+      - ollama-chat
