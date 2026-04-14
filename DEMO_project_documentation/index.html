@@ -1,0 +1,1055 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Teachable documentation for the retro Control Panel command station">
+      
+      
+      
+        <link rel="canonical" href="https://gunnarklee.github.io/control_panel_dist/DEMO_project_documentation/">
+      
+      
+        <link rel="prev" href="..">
+      
+      
+        <link rel="next" href="../DEMO_project_documentation_slides/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>DEMO Project Documentation - Control Panel Command Station Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="brown" data-md-color-accent="amber">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#demo-project-documentation" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Control Panel Command Station Docs" class="md-header__button md-logo" aria-label="Control Panel Command Station Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Control Panel Command Station Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              DEMO Project Documentation
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="brown" data-md-color-accent="amber"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="brown" data-md-color-accent="lime"  aria-hidden="true"  type="radio" name="__palette" id="__palette_1">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/gunnarklee/control_panel_dist" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    control_panel_dist
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Control Panel Command Station Docs" class="md-nav__button md-logo" aria-label="Control Panel Command Station Docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Control Panel Command Station Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/gunnarklee/control_panel_dist" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    control_panel_dist
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DEMO Project Documentation
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    DEMO Project Documentation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-map-the-source-material" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Map the Source Material
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-initialize-mkdocs-locally-10-min" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Initialize MkDocs Locally (10 min)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-authoring-flow-for-this-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Authoring Flow for This Project
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Authoring Flow for This Project">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#suggested-section-layout" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Suggested Section Layout
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-customize-navigation-theme-and-search" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Customize Navigation, Theme, and Search
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-automate-deploys-with-github-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Automate Deploys with GitHub Actions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-enable-pages-backfill-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Enable Pages &amp; Backfill History
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-where-docusaurus-fits" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Where Docusaurus Fits
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#8-teach-it-forward" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        8. Teach It Forward
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#9-next-actions-checklist" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        9. Next Actions Checklist
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../DEMO_project_documentation_slides/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Slide Deck
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Developer Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Developer Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dash_compliance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dash Compliance Guide
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quizzes
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Quizzes
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quizzes/docs_workflow_quiz_01.json" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docs Workflow Fundamentals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quizzes/docs_workflow_quiz_02.json" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    MkDocs Build Lifecycle
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quizzes/docs_workflow_quiz_03.json" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub Pages Delivery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quizzes/docs_workflow_quiz_04.json" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docusaurus Strategy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quizzes/docs_workflow_quiz_05.json" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Troubleshooting Runbooks
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="demo-project-documentation">DEMO Project Documentation<a class="headerlink" href="#demo-project-documentation" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p>A teachable walkthrough that turns the existing Control Panel README into living documentation, deployable with MkDocs + GitHub Pages, and extensible to Docusaurus when you need a richer doc portal.</p>
+</blockquote>
+<h2 id="1-map-the-source-material">1. Map the Source Material<a class="headerlink" href="#1-map-the-source-material" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Inventory current assets</strong>: collect the Control Panel README, persona notes, proxy env tables, and onboarding steps. Drop any supporting media (screenshots, diagrams) into <code>docs/assets/</code> so MkDocs can bundle them.</li>
+<li><strong>Slice content into modules</strong>:</li>
+<li><em>Mission &amp; theme</em> → Overview</li>
+<li><em>Runtime controls (personas, toggles)</em> → Operations Guide</li>
+<li><em>Env vars, tunnels, subprocess safety</em> → Reference</li>
+<li><em>Launch checklists + troubleshooting</em> → Playbooks</li>
+<li><strong>Decide audiences</strong>: Admin (full cockpit), Scientist (restricted), Infrastructure (proxy ops). Each audience gets a short "You care about…" call-out at the top of the relevant section.</li>
+</ol>
+<blockquote>
+<p>Tip: keep prose in Markdown and push screenshots/diagrams to lighter-weight formats (SVG/PNG). MkDocs auto-reloads during <code>mkdocs serve</code>, so edits are fast to preview.</p>
+</blockquote>
+<h2 id="2-initialize-mkdocs-locally-10-min">2. Initialize MkDocs Locally (10 min)<a class="headerlink" href="#2-initialize-mkdocs-locally-10-min" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>mkdocs<span class="w"> </span>mkdocs-material<span class="w"> </span>pymdown-extensions
+mkdocs<span class="w"> </span>new<span class="w"> </span>.<span class="w">  </span><span class="c1"># already done in this repo; creates mkdocs.yml + docs/</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Command</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mkdocs serve</code></td>
+<td>Live preview at http://127.0.0.1:8000 while editing</td>
+</tr>
+<tr>
+<td><code>mkdocs build</code></td>
+<td>Produces <code>/site</code> (static HTML) locally</td>
+</tr>
+<tr>
+<td><code>mkdocs gh-deploy</code></td>
+<td>Builds + publishes to <code>gh-pages</code> branch</td>
+</tr>
+</tbody>
+</table>
+<h2 id="3-authoring-flow-for-this-project">3. Authoring Flow for This Project<a class="headerlink" href="#3-authoring-flow-for-this-project" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Write in <code>docs/DEMO_project_documentation.md</code> (this file). Use headings that mirror cockpit workflows so operators can scan quickly.</li>
+<li>Use short callout blocks (e.g., <code>!!! note "Scientist Persona"</code>). The Material theme renders them as collapsible cards.</li>
+<li>Keep tables narrow: MkDocs handles responsive tables, but large 8+ column grids should be broken into subsections or definition lists.</li>
+<li>Embed code fences for env var snippets so the dark/light theme toggle remains legible.</li>
+</ol>
+<h3 id="suggested-section-layout">Suggested Section Layout<a class="headerlink" href="#suggested-section-layout" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Questions Answered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Control Panel Mission</td>
+<td>What is this console for? Who uses it?</td>
+</tr>
+<tr>
+<td>Persona Cockpits</td>
+<td>Which persona sees which toggles? How do env vars pin a persona?</td>
+</tr>
+<tr>
+<td>Launch Recipes</td>
+<td>Exact commands to start Utilities vs Reactors, including proxy toggles</td>
+</tr>
+<tr>
+<td>Reverse Proxy Deep Dive</td>
+<td>How tunnels are spawned, health-checked, and torn down</td>
+</tr>
+<tr>
+<td>Extending the Console</td>
+<td>How to add new scripts/cards safely</td>
+</tr>
+<tr>
+<td>Distribution Checklist</td>
+<td>How to onboard a new operator</td>
+</tr>
+</tbody>
+</table>
+<h2 id="4-customize-navigation-theme-and-search">4. Customize Navigation, Theme, and Search<a class="headerlink" href="#4-customize-navigation-theme-and-search" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span class="nt">nav</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Home</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">index.md</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">DEMO Project Documentation</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEMO_project_documentation.md</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Slide Deck</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DEMO_project_documentation_slides.md</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Quizzes</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Docs Workflow Fundamentals</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quizzes/docs_workflow_quiz_01.json</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">MkDocs Build Lifecycle</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quizzes/docs_workflow_quiz_02.json</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">GitHub Pages Delivery</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quizzes/docs_workflow_quiz_03.json</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Docusaurus Strategy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quizzes/docs_workflow_quiz_04.json</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Troubleshooting Runbooks</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">quizzes/docs_workflow_quiz_05.json</span>
+</code></pre></div>
+<ul>
+<li><strong>Theme</strong>: <code>material</code> offers instant dark/light toggle, nested navigation, and built-in search. Toggle features under <code>theme.features</code> to match how much chrome you want.</li>
+<li><strong>Branding</strong>: set <code>site_name</code>, <code>site_description</code>, and optionally <code>site_url</code> in <code>mkdocs.yml</code> so the generated metadata matches the Control Panel branding.</li>
+<li><strong>Search</strong>: Material bundles lunr.js search; no config needed beyond <code>plugins: [search]</code>, but you can add <code>separator: '[\s\-]+'</code> to better index <code>CONTROL_PANEL_*</code> tokens.</li>
+<li><strong>Content Reuse</strong>: use <code>!include</code> via the <code>pymdownx.snippets</code> extension if you want to single-source env var tables across README + docs.</li>
+</ul>
+<h2 id="5-automate-deploys-with-github-actions">5. Automate Deploys with GitHub Actions<a class="headerlink" href="#5-automate-deploys-with-github-actions" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Create <code>.github/workflows/mkdocs-deploy.yml</code> with:</li>
+<li><code>actions/checkout@v4</code></li>
+<li><code>actions/setup-python</code> pinned to 3.11+</li>
+<li><code>pip install mkdocs mkdocs-material pymdown-extensions</code></li>
+<li><code>mkdocs gh-deploy --force</code></li>
+<li>In repo settings → Pages, choose <code>Deploy from branch</code>, <code>gh-pages</code>, <code>/ (root)</code>.</li>
+<li>Every push to <code>main</code> rebuilds documentation automatically. Add branch protection so only reviewed changes update the docs site.</li>
+</ol>
+<blockquote>
+<p>Need staging? Point MkDocs at Azure Static Web Apps or Netlify by running <code>mkdocs build</code> in CI and uploading the <code>/site</code> artifact—identical static output.</p>
+</blockquote>
+<h2 id="6-enable-pages-backfill-history">6. Enable Pages &amp; Backfill History<a class="headerlink" href="#6-enable-pages-backfill-history" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Run <code>mkdocs gh-deploy</code> once locally to create the <code>gh-pages</code> branch.</li>
+<li>In GitHub UI, enable Pages using that branch.</li>
+<li>Optional: add a <code>CNAME</code> file (<code>mkdocs.yml -&gt; extra: social:</code>) if you have a custom domain like <code>docs.control-panel.io</code>.</li>
+<li>Add status badge to the README so everyone knows where the live docs live.</li>
+</ol>
+<h2 id="7-where-docusaurus-fits">7. Where Docusaurus Fits<a class="headerlink" href="#7-where-docusaurus-fits" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>MkDocs</th>
+<th>Docusaurus</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pure Markdown SOPs</td>
+<td>✅ Minimal tooling</td>
+<td>⚪ Requires React build</td>
+</tr>
+<tr>
+<td>API docs with autogenerated nav</td>
+<td>➖ Needs plugins like mkdocstrings</td>
+<td>✅ Built-in sidebar generation</td>
+</tr>
+<tr>
+<td>Versioned docs / multiple locales</td>
+<td>⚪ Doable with plugins</td>
+<td>✅ First-class (docs versions + i18n)</td>
+</tr>
+<tr>
+<td>Blogging, landing pages, React widgets</td>
+<td>⚪ Limited (no React runtime)</td>
+<td>✅ Built on React + MDX</td>
+</tr>
+<tr>
+<td>Build speed / simplicity</td>
+<td>✅ Single <code>mkdocs</code> binary</td>
+<td>➖ Node/Yarn toolchain</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Recommendation</strong>: Start with MkDocs for speed. If you outgrow it (need MDX components, doc versions, marketing pages), stand up a sibling <code>docs-docusaurus</code> directory. You can even feed the same Markdown into both by keeping shared content in <code>/docs/src/partials/</code> and importing as needed.</p>
+<h2 id="8-teach-it-forward">8. Teach It Forward<a class="headerlink" href="#8-teach-it-forward" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Live demo</strong>: run <code>mkdocs serve</code>, share screen, and show how edits propagate instantly.</li>
+<li><strong>Hands-on exercise</strong>: ask learners to add a new section under "Reverse Proxy Deep Dive" describing one of their tunnels, then preview via MkDocs.</li>
+<li><strong>Assess understanding</strong>: upload the JSON quizzes (see <code>docs/quizzes/</code>) into the Learning Platform so operators can self-check.</li>
+<li><strong>Slide deck</strong>: present the Markdown in <code>DEMO_project_documentation_slides.md</code> through Marp, Docs to Deck, or GitPitch.</li>
+</ol>
+<h2 id="9-next-actions-checklist">9. Next Actions Checklist<a class="headerlink" href="#9-next-actions-checklist" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[ ] Confirm Persona env vars documented for both admin &amp; scientist cockpits</li>
+<li>[ ] Record a 90-second walkthrough GIF of the retro console UI for the Overview section</li>
+<li>[ ] Backfill reverse proxy diagrams (local → SSH tunnel → remote host)</li>
+<li>[ ] Migrate onboarding checklist from README into <code>docs/ops/onboarding.md</code> for future trainees</li>
+</ul>
+<p>Once these boxes are checked, the Control Panel story lives in a discoverable, teachable knowledge base with automated hosting.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/gunnarklee/control_panel_dist" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.top", "navigation.expand", "navigation.sections", "navigation.tracking", "toc.integrate", "content.code.copy", "search.highlight", "search.suggest"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

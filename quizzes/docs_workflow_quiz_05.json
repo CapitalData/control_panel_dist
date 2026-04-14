@@ -1,0 +1,50 @@
+{
+  "title": "Troubleshooting Runbooks",
+  "description": "Ensures operators can diagnose common MkDocs + Pages issues.",
+  "learning_path": "devops_documentation",
+  "course_id": "cp-docs-402",
+  "file_id": "docs_workflow_quiz_05",
+  "trackable": true,
+  "questions": [
+    {
+      "question": "What is the first step if the GitHub Pages site shows a 404 after a deploy?",
+      "options": [
+        "Delete the repository",
+        "Verify Pages is pointed at the `gh-pages` branch and build finished successfully",
+        "Switch to FTP hosting",
+        "Run `pip uninstall mkdocs`
+      ],
+      "correct_answer": 1,
+      "explanation": "Most 404s happen when Pages is misconfigured or the deployment failed, so confirm the branch/folder and Action logs."
+    },
+    {
+      "question": "How do you troubleshoot missing styles after a build?",
+      "options": [
+        "Ensure `theme: material` and related assets were installed (`pip install mkdocs-material`)",
+        "Clear the GitHub Actions cache",
+        "Disable dark mode",
+        "Re-run Dash apps"
+      ],
+      "correct_answer": 0,
+      "explanation": "If the Material package is missing, MkDocs falls back to the default theme; reinstalling dependencies fixes the styling."
+    },
+    {
+      "question": "Which log file helps when `mkdocs serve` fails locally?",
+      "options": [
+        "`mkdocs serve` terminal output looking for missing extensions",
+        "Windows Event Viewer",
+        "Browser devtools only",
+        "Control Panel reactor logs"
+      ],
+      "correct_answer": 0,
+      "explanation": "The CLI output usually reports missing Markdown extensions or syntax errors—fix those and re-run `mkdocs serve`."
+    }
+  ],
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time_minutes": 5,
+    "topics": ["troubleshooting", "mkdocs", "github_pages"],
+    "created_date": "2026-01-13",
+    "version": "1.0"
+  }
+}
