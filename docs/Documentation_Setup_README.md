@@ -52,7 +52,7 @@ After editing `mkdocs.yml`, rerun `mkdocs serve` to make sure navigation and the
 ## 7. Verification Checklist
 
 - [ ] `mkdocs serve` renders without warnings.
-- [ ] GitHub Action succeeds and updates `gh-pages`.
+- [ ] GitHub Actionssh-add ~/.ssh/id_ed25519 succeeds and updates `gh-pages`.
 - [ ] Pages site loads (no 404) and shows the latest nav.
 - [ ] README/Control Panel repo references the live docs URL.
 - [ ] Quizzes JSON files are uploaded to the Learning Platform if needed.
