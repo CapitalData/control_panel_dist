@@ -1,0 +1,50 @@
+{
+  "title": "GitHub Pages Delivery",
+  "description": "Verifies knowledge of the hosting pipeline and repo settings.",
+  "learning_path": "devops_documentation",
+  "course_id": "cp-docs-301",
+  "file_id": "docs_workflow_quiz_03",
+  "trackable": true,
+  "questions": [
+    {
+      "question": "Which branch should GitHub Pages serve once MkDocs is configured?",
+      "options": [
+        "main",
+        "gh-pages",
+        "develop",
+        "release"
+      ],
+      "correct_answer": 1,
+      "explanation": "`mkdocs gh-deploy` publishes the built HTML to `gh-pages`, so Pages must serve from that branch."
+    },
+    {
+      "question": "What is the purpose of the Pages settings step after the GitHub Action runs?",
+      "options": [
+        "It turns README files into issues",
+        "It tells GitHub which branch/folder to expose as the public site",
+        "It encrypts the quizzes JSON files",
+        "It disables repository cloning"
+      ],
+      "correct_answer": 1,
+      "explanation": "Pages must be pointed to `gh-pages` so the build output is actually hosted under the repo's Pages URL."
+    },
+    {
+      "question": "How do you add a custom domain such as `docs.control-panel.io`?",
+      "options": [
+        "Create a CNAME file committed to the repo and add DNS records",
+        "Rename the repository",
+        "Switch to Docusaurus automatically",
+        "Enable GitHub Discussions"
+      ],
+      "correct_answer": 0,
+      "explanation": "Custom domains require a `CNAME` file in the publishing branch and matching DNS `CNAME` records pointing at GitHub Pages."
+    }
+  ],
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time_minutes": 6,
+    "topics": ["github_pages", "ci_cd", "domains"],
+    "created_date": "2026-01-13",
+    "version": "1.0"
+  }
+}

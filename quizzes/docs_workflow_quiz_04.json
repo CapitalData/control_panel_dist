@@ -1,0 +1,50 @@
+{
+  "title": "Docusaurus Strategy",
+  "description": "Explores when to pick Docusaurus instead of MkDocs for this project.",
+  "learning_path": "devops_documentation",
+  "course_id": "cp-docs-401",
+  "file_id": "docs_workflow_quiz_04",
+  "trackable": true,
+  "questions": [
+    {
+      "question": "Which capability is native to Docusaurus but requires extra plugins in MkDocs?",
+      "options": [
+        "Dark mode",
+        "MDX components with live React widgets",
+        "Plain Markdown rendering",
+        "Single-command builds"
+      ],
+      "correct_answer": 1,
+      "explanation": "Docusaurus ships with MDX/React so interactive components are natural, whereas MkDocs would need custom plugins or embeds."
+    },
+    {
+      "question": "When is it most appropriate to stay on MkDocs instead of migrating?",
+      "options": [
+        "When you only need Markdown SOPs with fast builds",
+        "When you need multi-lingual docs and blog features",
+        "When you require versioned doc sets for every release",
+        "When you must embed React live code sandboxes"
+      ],
+      "correct_answer": 0,
+      "explanation": "MkDocs excels at straightforward Markdown documentation with minimal tooling overhead."
+    },
+    {
+      "question": "What additional toolchain does Docusaurus introduce?",
+      "options": [
+        "Go modules",
+        "Node.js/Yarn build pipeline",
+        "Rust cargo builds",
+        "Perl scripts"
+      ],
+      "correct_answer": 1,
+      "explanation": "Docusaurus builds with Node.js (typically Yarn or npm), unlike MkDocs' Python-only toolchain."
+    }
+  ],
+  "metadata": {
+    "difficulty": "intermediate",
+    "estimated_time_minutes": 5,
+    "topics": ["docusaurus", "mkdocs", "decision_making"],
+    "created_date": "2026-01-13",
+    "version": "1.0"
+  }
+}
